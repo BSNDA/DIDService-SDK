@@ -16,9 +16,9 @@ BSN currently provides a Java-based SDK, developers can quickly and easily acces
 ### Access Parameters
 - Gateway address
 
-	BSN International: `https://didservice.bsngate.com:18602`
+	BSN China: `https://didservice.bsngate.com:18602`
 
-	BSN China: `https://did.bsngate.com:18602`
+	BSN International: `https://did.bsngate.com:18602`
 
 - Public Test Parameters
 
