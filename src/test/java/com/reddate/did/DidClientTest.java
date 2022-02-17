@@ -502,8 +502,8 @@ public class DidClientTest extends DidClientTestBase {
 		createCredential.setUserDid(didDataWrapper2.getDid());
         createCredential.setExpirationDate("2025-03-17");
         Map<String,Object> clainMap = new HashMap<>();
-        clainMap.put("name", "文增a");
-        clainMap.put("sex", "女");
+        clainMap.put("name", "aa");
+        clainMap.put("sex", "female");
         clainMap.put("age", 38);
         createCredential.setClaim(clainMap);
         createCredential.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
@@ -564,8 +564,8 @@ public class DidClientTest extends DidClientTestBase {
 		createCredential.setUserDid(didDataWrapper2.getDid());
         createCredential.setExpirationDate("2025-03-17");
         Map<String,Object> clainMap = new HashMap<>();
-        clainMap.put("name", "文增a");
-        clainMap.put("sex", "女");
+        clainMap.put("name", "aa");
+        clainMap.put("sex", "female");
         clainMap.put("age", 38);
         createCredential.setClaim(clainMap);
         createCredential.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
@@ -627,8 +627,8 @@ public class DidClientTest extends DidClientTestBase {
 		createCredential.setUserDid(didDataWrapper2.getDid());
         createCredential.setExpirationDate("2025-03-17");
         Map<String,Object> clainMap = new HashMap<>();
-        clainMap.put("name", "文增a");
-        clainMap.put("sex", "女");
+        clainMap.put("name", "aa");
+        clainMap.put("sex", "female");
         clainMap.put("age", 38);
         createCredential.setClaim(clainMap);
         createCredential.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
@@ -692,8 +692,8 @@ public class DidClientTest extends DidClientTestBase {
 		createCredential.setUserDid(didDataWrapper2.getDid());
         createCredential.setExpirationDate("2025-03-17");
         Map<String,Object> clainMap = new HashMap<>();
-        clainMap.put("name", "文增a");
-        clainMap.put("sex", "女");
+        clainMap.put("name", "aa");
+        clainMap.put("sex", "female");
         clainMap.put("age", 38);
         createCredential.setClaim(clainMap);
         createCredential.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());

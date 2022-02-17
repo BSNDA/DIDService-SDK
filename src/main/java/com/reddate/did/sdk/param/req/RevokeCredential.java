@@ -2,40 +2,28 @@ package com.reddate.did.sdk.param.req;
 
 import java.io.Serializable;
 
-
 /**
- * 
  * Revoke credential request data strucutre
- * 
- *
  */
 public class RevokeCredential implements Serializable {
 
 	/**
-	 * 
 	 * credential id
-	 * 
 	 */
 	private String credId;
-	
+
 	/**
-	 * 
 	 * CPT template id
-	 * 
 	 */
 	private Long cptId;
-	
+
 	/**
-	 * 
 	 * credential issuer did
-	 * 
 	 */
 	private String did;
-	
+
 	/**
-	 * 
 	 * credential issuer private key
-	 * 
 	 */
 	private String privateKey;
 
@@ -70,6 +58,5 @@ public class RevokeCredential implements Serializable {
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
 	}
-	
-	
+
 }

@@ -3,54 +3,40 @@ package com.reddate.did.sdk.param.req;
 import java.io.Serializable;
 
 /**
- * 
  * Create permission request data structure
- * 
- * 
- *
  */
 public class CreatePermission implements Serializable {
 
 	/**
 	 * resource owner did
-	 * 
 	 */
 	private String did;
-	
+
 	/**
 	 * resource url
-	 * 
 	 */
 	private String url;
 
 	/**
 	 * grant information
-	 * 
 	 */
 	private Operation grant;
 
 	/**
 	 * grant user did
-	 * 
-	 * 
 	 */
 	private String grantDid;
-	  
+
 	/**
-	 * 
 	 * grant user public key
-	 * 
 	 */
 	private String grantPublicKey;
-	
+
 	/**
-	 * 
 	 * resource owner private key
-	 * 
 	 */
 	private String privateKey;
 
-	
 	public String getDid() {
 		return did;
 	}
@@ -98,7 +84,5 @@ public class CreatePermission implements Serializable {
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
 	}
-	
-	
-	
+
 }

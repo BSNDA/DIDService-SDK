@@ -3,12 +3,12 @@ package com.reddate.did.sdk.param.req;
 import java.io.Serializable;
 
 /**
- * Delete permission request data structure
+ * Query resource operation history request data structure
  */
-public class DeletePermission implements Serializable {
+public class QueryResourceHistory implements Serializable{
 
 	/**
-	 * identify hub user did
+	 * did identifier
 	 */
 	private String did;
 
@@ -16,19 +16,14 @@ public class DeletePermission implements Serializable {
 	 * resource url
 	 */
 	private String url;
-
+	
 	/**
-	 * grant identify hub user did
+	 * resource operation
 	 */
-	private String grantDid;
+	private Operation operation;
 
 	/**
-	 * grant information
-	 */
-	private Operation grant;
-
-	/**
-	 * identify hub user private key
+	 * private key
 	 */
 	private String privateKey;
 
@@ -39,7 +34,7 @@ public class DeletePermission implements Serializable {
 	public void setDid(String did) {
 		this.did = did;
 	}
-
+	
 	public String getUrl() {
 		return url;
 	}
@@ -48,20 +43,12 @@ public class DeletePermission implements Serializable {
 		this.url = url;
 	}
 
-	public String getGrantDid() {
-		return grantDid;
+	public Operation getOperation() {
+		return operation;
 	}
 
-	public void setGrantDid(String grantDid) {
-		this.grantDid = grantDid;
-	}
-
-	public Operation getGrant() {
-		return grant;
-	}
-
-	public void setGrant(Operation grant) {
-		this.grant = grant;
+	public void setOperation(Operation operation) {
+		this.operation = operation;
 	}
 
 	public String getPrivateKey() {

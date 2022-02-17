@@ -8,17 +8,15 @@ import org.fisco.bcos.web3j.crypto.gm.sm2.SM2Sign;
 import org.fisco.bcos.web3j.crypto.gm.sm3.SM3Digest;
 import org.fisco.bcos.web3j.utils.Numeric;
 
+import com.reddate.did.sdk.protocol.common.KeyPair;
+
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
 
 /**
- * 
  * ECDSAU utils class,
  * some common tools method implement in this class
- * 
- * 
- *
  */
 public class ECDSAUtils {
 
@@ -27,15 +25,13 @@ public class ECDSAUtils {
     private static String data = "ecdsa security";
 
     /**
-     * 
      * Generate public and private keys
      * 
+     * @return return public and private key
      * 
-     * @return
-     * @throws Exception
      */
-    public static com.reddate.did.sdk.protocol.common.KeyPair createKey() throws Exception{
-    	com.reddate.did.sdk.protocol.common.KeyPair keyPair = new com.reddate.did.sdk.protocol.common.KeyPair();
+    public static KeyPair createKey() throws Exception{
+    	KeyPair keyPair = new KeyPair();
         ECKeyPair keyPairOriginal = Keys.createEcKeyPair();
         keyPair.setPublicKey(keyPairOriginal.getPublicKey().toString());
         keyPair.setPrivateKey(keyPairOriginal.getPrivateKey().toString());
@@ -44,7 +40,6 @@ public class ECDSAUtils {
     }
 
     /**
-     * 
      * get public key from private key
      * 
      * @param privateKey
@@ -62,6 +57,7 @@ public class ECDSAUtils {
     
     /**
      * Sign the message according to the private key
+     * 
      * @param message
      * @param privateKey
      */
@@ -91,6 +87,7 @@ public class ECDSAUtils {
     
     /**
      * Verify the signature of the message according to the public key
+     * 
      * @param message
      * @param publicKey
      * @param signValue

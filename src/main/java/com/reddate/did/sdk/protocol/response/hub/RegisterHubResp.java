@@ -3,30 +3,24 @@ package com.reddate.did.sdk.protocol.response.hub;
 import java.io.Serializable;
 
 /**
- * 
  * Register Hub response data structure
- * 
- *
  */
 public class RegisterHubResp implements Serializable {
 
 	/**
 	 * is process success flag
-	 * 
 	 */
-	  private boolean success = false;
-	  
-	  /**
-	   * use id
-	   * 
-	   */
-	  private String uid;
+	private boolean success = false;
 
-	  /**
-	   * error message
-	   * 
-	   */
-	  private String message;
+	/**
+	 * use id
+	 */
+	private String uid;
+
+	/**
+	 * error message
+	 */
+	private String message;
 
 	public boolean isSuccess() {
 		return success;
@@ -51,6 +45,5 @@ public class RegisterHubResp implements Serializable {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
-	
+
 }

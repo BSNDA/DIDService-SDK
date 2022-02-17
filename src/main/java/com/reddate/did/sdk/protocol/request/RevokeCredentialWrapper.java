@@ -1,66 +1,60 @@
 package com.reddate.did.sdk.protocol.request;
 
-
 import java.io.Serializable;
 
 /**
- * 
  * Revoke credential wrapper data structure
- * 
- *
  */
-public class RevokeCredentialWrapper implements Serializable{
+public class RevokeCredentialWrapper implements Serializable {
 
-    /**
-     * Document number that needs to be revoked
-     */
-    private String credId;
+	/**
+	 * Document number that needs to be revoked
+	 */
+	private String credId;
 
-    /**
-     * Voucher template number
-     */
-    private Long cptId;
+	/**
+	 * Voucher template number
+	 */
+	private Long cptId;
 
-    /**
-     * Did of the issuing party
-     */
-    private String did;
+	/**
+	 * Did of the issuing party
+	 */
+	private String did;
 
-    /**
-     * revoke date
-     * 
-     */
-    private String rovekeDate;
-    
-    /**
-     * proof
-     * 
-     */
-    private Proof proof;
+	/**
+	 * revoke date
+	 */
+	private String rovekeDate;
 
-    public String getCredId() {
-        return credId;
-    }
+	/**
+	 * proof
+	 */
+	private Proof proof;
 
-    public void setCredId(String credId) {
-        this.credId = credId;
-    }
+	public String getCredId() {
+		return credId;
+	}
 
-    public Long getCptId() {
-        return cptId;
-    }
+	public void setCredId(String credId) {
+		this.credId = credId;
+	}
 
-    public void setCptId(Long cptId) {
-        this.cptId = cptId;
-    }
+	public Long getCptId() {
+		return cptId;
+	}
 
-    public String getDid() {
-        return did;
-    }
+	public void setCptId(Long cptId) {
+		this.cptId = cptId;
+	}
 
-    public void setDid(String did) {
-        this.did = did;
-    }
+	public String getDid() {
+		return did;
+	}
+
+	public void setDid(String did) {
+		this.did = did;
+	}
 
 	public Proof getProof() {
 		return proof;

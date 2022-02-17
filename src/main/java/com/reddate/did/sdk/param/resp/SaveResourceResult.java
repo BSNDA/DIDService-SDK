@@ -3,29 +3,19 @@ package com.reddate.did.sdk.param.resp;
 import java.io.Serializable;
 
 /**
- * Save resource result description data structure 
- * 
- * 
- * 
- * 
- *
+ * Save resource result description data structure
  */
 public class SaveResourceResult implements Serializable {
 
 	/**
-	 * 
 	 * the resource url
-	 * 
 	 */
-	  private String url;
+	private String url;
 
-	  /**
-	   * 
-	   * the resource encryption key
-	   * 
-	   */
-	  private String encryptKey;
-	  
+	/**
+	 * the resource encryption key
+	 */
+	private String encryptKey;
 
 	public String getUrl() {
 		return url;

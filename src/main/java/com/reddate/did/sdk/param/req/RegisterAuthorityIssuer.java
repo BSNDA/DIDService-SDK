@@ -2,17 +2,12 @@ package com.reddate.did.sdk.param.req;
 
 
 /**
- * 
  * Register authority issuer description data structure
- * 
- *
  */
 public class RegisterAuthorityIssuer extends AuthorityIssuer{
     
 	/**
-	 * 
 	 * private key
-	 * 
 	 */
 	private String privateKey;
 

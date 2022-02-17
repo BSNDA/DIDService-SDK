@@ -36,7 +36,7 @@ public class ResultDataTest {
 
     @Test
     public void testError2() {
-        ResultData<Object> actualErrorResult = ResultData.<Object>error("Not all who wander are lost", Object.class);
+        ResultData<Object> actualErrorResult = ResultData.<Object>error(1,"Not all who wander are lost", Object.class);
         assertEquals(400, actualErrorResult.getCode().intValue());
         assertEquals("Not all who wander are lost", actualErrorResult.getMsg());
     }

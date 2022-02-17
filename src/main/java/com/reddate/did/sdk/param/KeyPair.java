@@ -5,31 +5,22 @@ package com.reddate.did.sdk.param;
 import java.io.Serializable;
 
 /**
- * 
  * Asymmetrical Encryption Algorithm key pair
- * 
- *
  */
 public class KeyPair implements Serializable {
 
 	/**
 	 * public key string value
-	 * 
-	 * 
 	 */
 	private String publicKey;
 
 	/**
-	 * 
 	 * private key string value
-	 * 
 	 */
 	private String privateKey;
 
 	/**
-	 * 
 	 * asymmetrical encryption algorithm type
-	 * 
 	 */
 	private CryptoType type;
 
@@ -56,5 +47,5 @@ public class KeyPair implements Serializable {
 	public void setType(CryptoType type) {
 		this.type = type;
 	}
-	
+
 }

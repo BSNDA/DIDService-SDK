@@ -3,31 +3,22 @@ package com.reddate.did.sdk.protocol.request;
 import java.io.Serializable;
 
 /**
- * 
  * Auth issuer list wrapper data structure
- * 
- * 
- *
  */
 public class AuthIssuerListWrapper implements Serializable {
 
 	/**
 	 * current page nubmer
-	 * 
-	 * 
 	 */
 	private Integer page;
-	
+
 	/**
-	 * 
 	 * page size
-	 * 
 	 */
 	private Integer size;
-	
+
 	/**
 	 * user id
-	 * 
 	 */
 	private String did;
 
@@ -54,6 +45,5 @@ public class AuthIssuerListWrapper implements Serializable {
 	public void setDid(String did) {
 		this.did = did;
 	}
-	
-	
+
 }

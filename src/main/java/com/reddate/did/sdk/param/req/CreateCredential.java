@@ -6,50 +6,46 @@ import java.io.Serializable;
 import java.util.Map;
 
 /**
- * 
  * Create credential request data structure
- * 
- *
  */
-public class CreateCredential implements Serializable{
+public class CreateCredential implements Serializable {
 
 	/**
-	 *  Voucher template number
+	 * Voucher template number
 	 */
 	@JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long cptId;
+	private Long cptId;
 
 	/**
-	 *  Did of the issuer of the certificate template
+	 * Did of the issuer of the certificate template
 	 */
-    private String issuerDid;
+	private String issuerDid;
 
 	/**
-	 *  Did of the user who applied for the credential
+	 * Did of the user who applied for the credential
 	 */
-    private String userDid;
+	private String userDid;
 
 	/**
-	 *  Voucher expiration date
+	 * Voucher expiration date
 	 */
-    private String expirationDate;
+	private String expirationDate;
 
 	/**
-	 *  The claim data, the claim data need to correspond to the format of the cpt template
+	 * The claim data, the claim data need to correspond to the format of the cpt
+	 * template
 	 */
-    private Map<String, Object> claim;
+	private Map<String, Object> claim;
 
 	/**
-	 *  Voucher type: Proof
+	 * Voucher type: Proof
 	 */
-    private String type;
-    
-    /**
-     * 
-     * private key string value
-     * 
-     */
-    private String privateKey;
+	private String type;
+
+	/**
+	 * private key string value
+	 */
+	private String privateKey;
 
 	public Long getCptId() {
 		return cptId;
@@ -106,5 +102,5 @@ public class CreateCredential implements Serializable{
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
 	}
-	
+
 }

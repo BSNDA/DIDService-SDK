@@ -5,32 +5,22 @@ import java.io.Serializable;
 import com.reddate.did.sdk.protocol.common.KeyPair;
 
 /**
- * 
  * Rest did document authority public key request data structure
- * 
- * 
- *
  */
-public class ResetDidAuth implements Serializable{
+public class ResetDidAuth implements Serializable {
 
 	/**
 	 * did identifier
-	 * 
-	 * 
 	 */
 	private String did;
-	
+
 	/**
-	 * 
 	 * primary public key and private key
-	 * 
 	 */
 	private KeyPair primaryKeyPair;
-	
+
 	/**
-	 * 
 	 * reset authority public key and private key
-	 * 
 	 */
 	private ResetDidAuthKey recoveryKey;
 
@@ -57,5 +47,5 @@ public class ResetDidAuth implements Serializable{
 	public void setPrimaryKeyPair(KeyPair primaryKeyPair) {
 		this.primaryKeyPair = primaryKeyPair;
 	}
-	
+
 }

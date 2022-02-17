@@ -5,22 +5,17 @@ import java.io.Serializable;
 import com.reddate.did.sdk.protocol.common.DidDocument;
 
 /**
- * 
  * Reset did public key request data structure
- * 
- *
  */
-public class ResetDidWrapper implements Serializable{
+public class ResetDidWrapper implements Serializable {
 
 	/**
 	 * did document information
-	 * 
 	 */
 	private DidDocument didDoc;
-	
+
 	/**
 	 * authority public key sign value
-	 * 
 	 */
 	private String authPubKeySign;
 
@@ -39,5 +34,5 @@ public class ResetDidWrapper implements Serializable{
 	public void setAuthPubKeySign(String authPubKeySign) {
 		this.authPubKeySign = authPubKeySign;
 	}
-	
+
 }

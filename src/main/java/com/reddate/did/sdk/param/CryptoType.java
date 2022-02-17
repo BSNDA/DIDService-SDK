@@ -1,11 +1,7 @@
 package com.reddate.did.sdk.param;
 
 /**
- * 
  * Asymmetrical Encryption Algorithm type
- * 
- * 
- *
  */
 public enum CryptoType {
 	/**
@@ -16,14 +12,14 @@ public enum CryptoType {
 	 * The SM2 Asymmetrical Encryption Algorithm
 	 */
 	SM;
-	
+
 	public static CryptoType ofVlaue(Integer value) {
-		for(CryptoType tmp : CryptoType.values()) {
-			if(tmp.ordinal() == value) {
+		for (CryptoType tmp : CryptoType.values()) {
+			if (tmp.ordinal() == value) {
 				return tmp;
 			}
 		}
 		return null;
 	}
-	
+
 }

@@ -3,49 +3,37 @@ package com.reddate.did.sdk.protocol.request;
 import java.io.Serializable;
 
 /**
- * 
  * Revoke credential request data structure
- * 
- *
  */
 public class RevokCredentialReq implements Serializable {
 
 	/**
 	 * credential id
-	 * 
-	 * 
 	 */
 	private String credId;
-	
+
 	/**
 	 * CPT template id
-	 * 
 	 */
 	private Long cptId;
-	
+
 	/**
-	 * 
 	 * did identify
-	 * 
 	 */
 	private String did;
-	
+
 	/**
-	 * 
 	 * revoke date
-	 * 
 	 */
 	private String revokeDate;
-	
+
 	/**
 	 * public key sign value
-	 * 
 	 */
 	private String publicKeySign;
-	
+
 	/**
 	 * revoke sign value
-	 * 
 	 */
 	private String revokeSign;
 
@@ -97,5 +85,4 @@ public class RevokCredentialReq implements Serializable {
 		this.revokeSign = revokeSign;
 	}
 
-	
 }

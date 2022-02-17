@@ -1,33 +1,26 @@
 package com.reddate.did.sdk.param.resp;
 
 import java.io.Serializable;
+
 /**
- * Register hub user result description data structure 
- * 
- * 
- * 
- *
+ * Register hub user result description data structure
  */
 public class RegisterHubResult implements Serializable {
 
 	/**
 	 * is success flag
-	 * 
 	 */
-	  private boolean success = false;
-	  
-	  /**
-	   * 
-	   * register user id
-	   * 
-	   */
-	  private String did;
+	private boolean success = false;
 
-	  /**
-	   * error message when register failed
-	   * 
-	   */
-	  private String message;
+	/**
+	 * register user id
+	 */
+	private String did;
+
+	/**
+	 * error message when register failed
+	 */
+	private String message;
 
 	public boolean isSuccess() {
 		return success;
@@ -52,6 +45,5 @@ public class RegisterHubResult implements Serializable {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
-	
+
 }
