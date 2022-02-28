@@ -21,7 +21,7 @@ public class DidExceptionTest {
 
     @Test
     public void testConstructor2() {
-        DidException actualDidException = new DidException("An error occurred");
+        DidException actualDidException = new DidException(9999,"An error occurred");
         assertNull(actualDidException.getCause());
         assertEquals("com.did.exception.DidException: An error occurred", actualDidException.toString());
         assertEquals(0, actualDidException.getSuppressed().length);

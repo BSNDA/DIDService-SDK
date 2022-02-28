@@ -3,28 +3,22 @@ package com.reddate.did.sdk.protocol.request.hub;
 import java.io.Serializable;
 
 /**
- * 
  * delete resource request data structure
- * 
- *
  */
-public class DeleteResourceReq implements HubBaseReq,Serializable{
+public class DeleteResourceReq implements HubBaseReq, Serializable {
 
 	/**
 	 * use id
-	 * 
 	 */
 	private String uid;
-	
+
 	/**
 	 * resource url
-	 * 
 	 */
 	private String url;
-	
+
 	/**
 	 * sign value
-	 * 
 	 */
 	private String sign;
 
@@ -55,20 +49,15 @@ public class DeleteResourceReq implements HubBaseReq,Serializable{
 	@Override
 	public String contractToString() {
 		StringBuffer buffer = new StringBuffer();
-		if(uid != null) {
+		if (uid != null) {
 			buffer.append(uid);
 		}
-		
-		if(url != null) {
+
+		if (url != null) {
 			buffer.append(url);
 		}
-		
+
 		return buffer.toString();
 	}
-	
-	
-	
-	
-	
-	
+
 }

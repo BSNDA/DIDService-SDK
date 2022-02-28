@@ -5,39 +5,27 @@ import java.time.LocalDateTime;
 
 import com.reddate.did.sdk.param.req.UsedFlag;
 
-/**
- * 
+/** 
  * Identify hub permission information description data structure
- * 
- * 
- * 
- *
  */
 public class PermissionInfo implements Serializable{
 
 	/**
-	 * 
 	 * resource url
-	 * 
 	 */
 	  private String url;
 
 	  /**
-	   * 
 	   * grant information
-	   * 
 	   */
 	  private String grant;
 
 	  /**
 	   * grant user id
-	   * 
-	   * 
 	   */
 	  private String grantUid;
 
 	  /**
-	   * 
 	   * permission status:
 	   * 0 - already logic delete permission record 
 	   * 1 - login active permission record
@@ -45,15 +33,12 @@ public class PermissionInfo implements Serializable{
 	  private Integer status;
 
 	  /**
-	   * 
 	   * permission record create time
-	   * 
 	   */
 	  private LocalDateTime createTime;
 
 	  /**
 	   * permission used time
-	   * 
 	   */
 	  private LocalDateTime readTime;
 
@@ -61,27 +46,21 @@ public class PermissionInfo implements Serializable{
 	   * permission used flag:
 	   * YES - permission has been used
 	   * NO - permission do not used
-	   * 
 	   */
 	  private UsedFlag flag;
 
 	  /**
-	   * 
 	   * resource owner user id
-	   * 
 	   */
 	  private String uid;
 
 	  /**
 	   * the resource encryption key of grant user
-	   * 
 	   */
 	  private String key;
 
 	  /**
 	   * the resource encryption key for resource owner user
-	   * 
-	   * 
 	   */
 	  private String ownerKey;
 

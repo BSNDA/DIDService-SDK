@@ -4,7 +4,6 @@ import java.util.List;
 
 /**
  * common page wrapper data structure
- * 
  *
  * @param <T>
  */
@@ -12,53 +11,67 @@ public class Pages<T> {
 
 	/**
 	 * current page nubmer
-	 * 
 	 */
-    private Integer page;
-    
-    /**
-     * 
-     * page size
-     */
-    private Integer size;
-    
-    /**
-     * 
-     * total record number
-     */
-    private Integer totalNum;
-    
-    /**
-     * 
-     * total page nubmer
-     */
-    private Integer totalPage;
-    
-    /**
-     * 
-     * page data list
-     * 
-     */
-    private List<T> result;
+	private Integer page;
 
-    public Integer getPage() { return page; }
+	/**
+	 * page size
+	 */
+	private Integer size;
 
-    public void setPage(Integer page) { this.page = page; }
+	/**
+	 * total record number
+	 */
+	private Integer totalNum;
 
-    public Integer getSize() { return size; }
+	/**
+	 * total page nubmer
+	 */
+	private Integer totalPage;
 
-    public void setSize(Integer size) { this.size = size; }
+	/**
+	 * page data list
+	 */
+	private List<T> result;
 
-    public Integer getTotalNum() { return totalNum; }
+	public Integer getPage() {
+		return page;
+	}
 
-    public void setTotalNum(Integer totalNum) { this.totalNum = totalNum; }
+	public void setPage(Integer page) {
+		this.page = page;
+	}
 
-    public Integer getTotalPage() { return totalPage; }
+	public Integer getSize() {
+		return size;
+	}
 
-    public void setTotalPage(Integer totalPage) { this.totalPage = totalPage; }
+	public void setSize(Integer size) {
+		this.size = size;
+	}
 
-    public List<T> getResult() { return result; }
+	public Integer getTotalNum() {
+		return totalNum;
+	}
 
-    public void setResult(List<T> result) { this.result = result; }
+	public void setTotalNum(Integer totalNum) {
+		this.totalNum = totalNum;
+	}
+
+	public Integer getTotalPage() {
+		return totalPage;
+	}
+
+	public void setTotalPage(Integer totalPage) {
+		this.totalPage = totalPage;
+	}
+
+	public List<T> getResult() {
+		return result;
+	}
+
+	public void setResult(List<T> result) {
+		this.result = result;
+	}
 
 }

@@ -3,32 +3,22 @@ package com.reddate.did.sdk.param.req;
 import java.io.Serializable;
 
 /**
- * 
  * reset authority public key and private key data structure
- * 
- *
  */
-public class ResetDidAuthKey implements Serializable{
+public class ResetDidAuthKey implements Serializable {
 
-	
 	/**
-	 * 
 	 * private key string value
-	 * 
 	 */
 	private String privateKey;
-	
+
 	/**
-	 * 
 	 * public key string value
-	 * 
 	 */
 	private String publicKey;
-	
+
 	/**
-	 * 
 	 * authority key type
-	 *
 	 */
 	private String type;
 
@@ -55,6 +45,5 @@ public class ResetDidAuthKey implements Serializable{
 	public void setType(String type) {
 		this.type = type;
 	}
-	
-	
+
 }

@@ -4,51 +4,36 @@ import java.io.Serializable;
 
 /**
  * Save resource request data structure
- * 
- * 
- *
  */
 public class SaveResource implements Serializable {
 
-	
 	/**
-	 * 
 	 * did identifier
-	 * 
 	 */
 	private String did;
-	
+
 	/**
 	 * resource content
-	 * 
 	 */
 	private String content;
-	
+
 	/**
-	 * 
 	 * resource url
-	 * 
 	 */
 	private String url;
-	
+
 	/**
-	 * 
 	 * resource owner did
-	 * 
 	 */
 	private String ownerDid;
-	
+
 	/**
-	 * 
 	 * grant information
-	 * 
 	 */
 	private Operation grant;
-	
+
 	/**
-	 * 
 	 * user private key
-	 * 
 	 */
 	private String privateKey;
 
@@ -100,8 +85,4 @@ public class SaveResource implements Serializable {
 		this.privateKey = privateKey;
 	}
 
-
-	
-	
-	
 }

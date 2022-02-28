@@ -3,9 +3,9 @@ package com.reddate.did.sdk.param.req;
 import java.io.Serializable;
 
 /**
- * Query permission request data structure
+ * Query permission to yourself request data structure
  */
-public class QueryPermission implements Serializable{
+public class QueryGrantedPermission implements Serializable{
 
 	/**
 	 * did identifier
@@ -13,9 +13,14 @@ public class QueryPermission implements Serializable{
 	private String did;
 
 	/**
-	 * grant user did
+	 * resource owner user did
 	 */
-	private String grantDid;
+	private String ownerDid;
+	
+	/**
+	 * grant permission
+	 */
+	private Operation grant;
 	
 	/**
 	 * used flag
@@ -34,13 +39,13 @@ public class QueryPermission implements Serializable{
 	public void setDid(String did) {
 		this.did = did;
 	}
-
-	public String getGrantDid() {
-		return grantDid;
+	
+	public String getOwnerDid() {
+		return ownerDid;
 	}
 
-	public void setGrantDid(String grantDid) {
-		this.grantDid = grantDid;
+	public void setOwnerDid(String ownerDid) {
+		this.ownerDid = ownerDid;
 	}
 
 	public UsedFlag getFlag() {
@@ -59,7 +64,12 @@ public class QueryPermission implements Serializable{
 		this.privateKey = privateKey;
 	}
 
-	
-	
-	
+	public Operation getGrant() {
+		return grant;
+	}
+
+	public void setGrant(Operation grant) {
+		this.grant = grant;
+	}
+
 }

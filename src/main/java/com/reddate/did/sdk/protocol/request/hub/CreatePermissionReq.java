@@ -3,56 +3,45 @@ package com.reddate.did.sdk.protocol.request.hub;
 import java.io.Serializable;
 
 /**
- * 
  * Create permission request data structure
- * 
- * 
- *
  */
-public class CreatePermissionReq implements HubBaseReq,Serializable{
+public class CreatePermissionReq implements HubBaseReq, Serializable {
 
 	/**
 	 * user id
-	 * 
 	 */
 	private String uid;
-	
+
 	/**
 	 * resource URL
-	 * 
 	 */
 	private String url;
 
 	/**
 	 * grant information
-	 * 
 	 */
 	private String grant;
 
 	/**
 	 * grant user id
-	 * 
 	 */
 	private String grantUid;
-	
+
 	/**
 	 * grant user's public key
-	 * 
 	 */
 	private String grantPublicKey;
-	
+
 	/**
 	 * grant encrypt Key
-	 * 
 	 */
 	private String grantEncryptKey;
-	
+
 	/**
 	 * sign value
-	 * 
 	 */
 	private String sign;
-	
+
 	public String getUid() {
 		return uid;
 	}
@@ -112,34 +101,31 @@ public class CreatePermissionReq implements HubBaseReq,Serializable{
 	@Override
 	public String contractToString() {
 		StringBuffer buffer = new StringBuffer();
-		if(uid != null) {
+		if (uid != null) {
 			buffer.append(uid);
 		}
-		
-		if(url != null) {
+
+		if (url != null) {
 			buffer.append(url);
 		}
-		
-		if(grant != null) {
+
+		if (grant != null) {
 			buffer.append(grant);
 		}
-		
-		if(grantUid != null) {
+
+		if (grantUid != null) {
 			buffer.append(grantUid);
 		}
-		
-		if(grantPublicKey != null) {
+
+		if (grantPublicKey != null) {
 			buffer.append(grantPublicKey);
 		}
 
-		if(grantEncryptKey != null) {
+		if (grantEncryptKey != null) {
 			buffer.append(grantEncryptKey);
 		}
-		
+
 		return buffer.toString();
 	}
-	
-	
-	
-	
+
 }

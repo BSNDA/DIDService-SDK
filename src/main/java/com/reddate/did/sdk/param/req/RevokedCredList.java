@@ -3,30 +3,22 @@ package com.reddate.did.sdk.param.req;
 import java.io.Serializable;
 
 /**
- * 
  * Query revoked credential list request data structure
- * 
- *
  */
 public class RevokedCredList implements Serializable {
 
-	
 	/**
-	 * 
 	 * current page number
-	 * 
 	 */
 	private Integer page;
-	
+
 	/**
 	 * page size
-	 * 
 	 */
 	private Integer size;
-	
+
 	/**
 	 * did identifier
-	 * 
 	 */
 	private String did;
 
@@ -53,7 +45,5 @@ public class RevokedCredList implements Serializable {
 	public void setDid(String did) {
 		this.did = did;
 	}
-	
-	
-	
+
 }

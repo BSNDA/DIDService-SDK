@@ -2,56 +2,41 @@ package com.reddate.did.sdk.param.req;
 
 import java.io.Serializable;
 
-
 /**
- * 
  * Check permission request data structure
- * 
- *
  */
-public class CheckPermission implements Serializable{
+public class CheckPermission implements Serializable {
 
 	/**
-	 * 
 	 * did identifier
-	 * 
 	 */
 	private String did;
-	
+
 	/**
-	 * 
 	 * resource owner did
-	 * 
 	 */
 	private String ownerDid;
-	
+
 	/**
 	 * grant user did
-	 * 
 	 */
 	private String grantDid;
-	
+
 	/**
 	 * resource url
-	 * 
-	 * 
 	 */
 	private String url;
-	
+
 	/**
 	 * grant information
-	 * 
-	 * 
 	 */
 	private Operation grant;
 
 	/**
-	 * 
 	 * user private key
-	 * 
 	 */
 	private String privateKey;
-	
+
 	public String getDid() {
 		return did;
 	}
@@ -99,5 +84,5 @@ public class CheckPermission implements Serializable{
 	public void setOwnerDid(String ownerDid) {
 		this.ownerDid = ownerDid;
 	}
-	
+
 }

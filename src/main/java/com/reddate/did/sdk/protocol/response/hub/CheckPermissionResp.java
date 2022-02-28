@@ -3,37 +3,29 @@ package com.reddate.did.sdk.protocol.response.hub;
 import java.io.Serializable;
 
 /**
- * 
  * Check permission response data structure
- * 
- *
  */
-public class CheckPermissionResp implements Serializable{
+public class CheckPermissionResp implements Serializable {
 
 	/**
 	 * is success flag
-	 * 
 	 */
-	  private boolean succes = false;
+	private boolean succes = false;
 
-	  /**
-	   * error message
-	   * 
-	   */
-	  private String message;
+	/**
+	 * error message
+	 */
+	private String message;
 
-	  /**
-	   * 
-	   * encryption key
-	   * 
-	   */
-	  private String key;
+	/**
+	 * encryption key
+	 */
+	private String key;
 
-	  /**
-	   * resource url
-	   * 
-	   */
-	  private String url;
+	/**
+	 * resource url
+	 */
+	private String url;
 
 	public boolean isSucces() {
 		return succes;
@@ -66,7 +58,5 @@ public class CheckPermissionResp implements Serializable{
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	
-	  
-	  
+
 }

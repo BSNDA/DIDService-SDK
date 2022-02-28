@@ -3,31 +3,39 @@ package com.reddate.did.sdk.protocol.request.hub;
 import java.io.Serializable;
 
 /**
- * 
- *  Check permission request data structure
- * 
- * 
- *
+ * Check permission request data structure
  */
-public class CheckPermissionReq implements HubBaseReq,Serializable{
+public class CheckPermissionReq implements HubBaseReq, Serializable {
 
-	/** user id */
+	/**
+	 * user id
+	 */
 	private String uid;
-	
-	/** owner user id */
+
+	/**
+	 * owner user id
+	 */
 	private String ownerUid;
-	
-	/** grant user id */
+
+	/**
+	 * grant user id
+	 */
 	private String grantUid;
-	
-	/** resource url  */
+
+	/**
+	 * resource url
+	 */
 	private String url;
-	
-	/** grant information  */
+
+	/**
+	 * grant information
+	 */
 	private String grant;
-	
-	/** sign value */
-	private String sign; 
+
+	/**
+	 * sign value
+	 */
+	private String sign;
 
 	public String getUid() {
 		return uid;
@@ -68,7 +76,7 @@ public class CheckPermissionReq implements HubBaseReq,Serializable{
 	public void setSign(String sign) {
 		this.sign = sign;
 	}
-	
+
 	public String getOwnerUid() {
 		return ownerUid;
 	}
@@ -80,19 +88,19 @@ public class CheckPermissionReq implements HubBaseReq,Serializable{
 	@Override
 	public String contractToString() {
 		StringBuffer buffer = new StringBuffer();
-		if(uid != null) {
+		if (uid != null) {
 			buffer.append(uid);
 		}
-		if(grantUid != null) {
+		if (grantUid != null) {
 			buffer.append(grantUid);
 		}
-		if(url != null) {
+		if (url != null) {
 			buffer.append(url);
 		}
-		if(grant != null) {
+		if (grant != null) {
 			buffer.append(grant);
 		}
-		if(ownerUid != null) {
+		if (ownerUid != null) {
 			buffer.append(ownerUid);
 		}
 		return buffer.toString();

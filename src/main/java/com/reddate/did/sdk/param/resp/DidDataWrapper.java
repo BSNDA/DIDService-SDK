@@ -6,33 +6,26 @@ import com.reddate.did.sdk.protocol.common.KeyPair;
 
 /**
  * Generated did document result wrapper data structure
- * 
- * 
- *
  */
 public class DidDataWrapper implements Serializable {
 
 	/**
 	 * Did Identifier
-	 * 
 	 */
 	private String did;
 	
 	/**
 	 * Main authenticate key pair
-	 * 
 	 */
 	private KeyPair authKeyInfo;
 	
 	/**
 	 * Recovery authenticate key pair
-	 * 
 	 */
 	private KeyPair recyKeyInfo;
 	
 	/**
 	 * Did document defined
-	 * 
 	 */
 	private DocumentInfo document;
 	

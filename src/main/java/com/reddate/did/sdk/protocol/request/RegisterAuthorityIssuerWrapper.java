@@ -2,32 +2,25 @@ package com.reddate.did.sdk.protocol.request;
 
 import java.io.Serializable;
 
-
 /**
- * 
  * Register authority issuer wrapper data structure
- * 
- *
  */
 public class RegisterAuthorityIssuerWrapper implements Serializable {
 
 	/**
 	 * did identify
 	 */
-    private String did;
+	private String did;
 
-    /**
-     * authority issuer name
-     * 
-     */
-    private String name;
-   
-    /**
-     * authority issuer public key sign value
-     * 
-     * 
-     */
-    private String publicKeySign;
+	/**
+	 * authority issuer name
+	 */
+	private String name;
+
+	/**
+	 * authority issuer public key sign value
+	 */
+	private String publicKeySign;
 
 	public String getDid() {
 		return did;
@@ -52,9 +45,5 @@ public class RegisterAuthorityIssuerWrapper implements Serializable {
 	public void setPublicKeySign(String publicKeySign) {
 		this.publicKeySign = publicKeySign;
 	}
-	
-    
-    
-    
-    
+
 }

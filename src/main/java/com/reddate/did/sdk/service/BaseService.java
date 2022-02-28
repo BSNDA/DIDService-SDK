@@ -6,23 +6,18 @@ import java.util.Map;
 import com.reddate.did.sdk.protocol.response.Pages;
 
 /**
- * 
- * the did service implement base class,
- *  some common function write in this class
- * 
- * 
- * @author danny
- *
+ * the did service implement base class, some common function write in this
+ * class
  */
 public class BaseService {
 
 	private String url;
-	
+
 	private String token;
-	
+
 	private String projectId;
-	
-	public BaseService(String url, String projectId,String token) {
+
+	public BaseService(String url, String projectId, String token) {
 		super();
 		this.url = url;
 		this.token = token;
@@ -40,25 +35,23 @@ public class BaseService {
 	public String getUrl() {
 		return url;
 	}
-	
-	
+
 	/**
-	 * 
 	 * Parse a map type page info to Pages type
 	 * 
-	 * @param <T> the business data class type
-	 * @param pageMap  Page information Map
-	 * @param elementType  the business data class type
+	 * @param <T>         the business data class type
+	 * @param pageMap     Page information Map
+	 * @param elementType the business data class type
 	 * @return Return the Pages information
 	 */
-	public <T> Pages<T> parseToPage(Map pageMap,Class elementType){
+	public <T> Pages<T> parseToPage(Map pageMap, Class elementType) {
 		Pages<T> page = new Pages<>();
-		page.setPage((Integer)pageMap.get("page"));
-		page.setSize((Integer)pageMap.get("size"));
-		page.setTotalNum((Integer)pageMap.get("totalNum"));
-		page.setTotalPage((Integer)pageMap.get("totalPage"));
-		page.setResult((List<T>)pageMap.get("result"));
+		page.setPage((Integer) pageMap.get("page"));
+		page.setSize((Integer) pageMap.get("size"));
+		page.setTotalNum((Integer) pageMap.get("totalNum"));
+		page.setTotalPage((Integer) pageMap.get("totalPage"));
+		page.setResult((List<T>) pageMap.get("result"));
 		return page;
 	}
-	
+
 }

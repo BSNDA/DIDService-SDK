@@ -4,26 +4,21 @@ import java.io.Serializable;
 
 /**
  *  Query credential wrapper data structure
- * 
- *
  */
 public class QueryCredentialWrapper implements Serializable{
 
 	/**
 	 * current page number
-	 * 
 	 */
 	private Integer page;
 	
 	/**
-	 * page size
-	 * 
+	 * page size 
 	 */
 	private Integer size;
 	
 	/**
 	 * did identify
-	 * 
 	 */
 	private String did;
 

@@ -1,105 +1,99 @@
 package com.reddate.did.sdk.protocol.request;
 
-
 import java.io.Serializable;
 import java.util.Map;
 
 /**
- * 
  * Register CPT wrapper data structure
- * 
- * 
- *
  */
 public class RegisterCptWrapper implements Serializable {
 
-    /**
-     * Did of the issuer of the voucher template
-     */
-    private String did;
+	/**
+	 * Did of the issuer of the voucher template
+	 */
+	private String did;
 
-    /**
-     * Map type Json Schema information
-     */
-    private Map<String, JsonSchema> cptJsonSchema;
+	/**
+	 * Map type Json Schema information
+	 */
+	private Map<String, JsonSchema> cptJsonSchema;
 
-    /**
-     * Voucher template title
-     */
-    private String title;
+	/**
+	 * Voucher template title
+	 */
+	private String title;
 
-    /**
-     * Detailed description of the voucher template
-     */
-    private String description;
+	/**
+	 * Detailed description of the voucher template
+	 */
+	private String description;
 
-    /**
-     * Document Type：Proof
-     */
-    private String type;
+	/**
+	 * Document Type: Proof
+	 */
+	private String type;
 
-    private Proof proof;
-    
-    private Long cptId;
+	private Proof proof;
 
-    /**
-     *  Creation time
-     */
-    private String create;
+	private Long cptId;
 
-    /**
-     *  Update time
-     */
-    private String update;
+	/**
+	 * Creation time
+	 */
+	private String create;
 
-    public Long getCptId() {
-        return cptId;
-    }
+	/**
+	 * Update time
+	 */
+	private String update;
 
-    public void setCptId(Long cptId) {
-        this.cptId = cptId;
-    }
+	public Long getCptId() {
+		return cptId;
+	}
 
-    public String getDid() {
-        return did;
-    }
+	public void setCptId(Long cptId) {
+		this.cptId = cptId;
+	}
 
-    public void setDid(String did) {
-        this.did = did;
-    }
+	public String getDid() {
+		return did;
+	}
 
-    public Map<String, JsonSchema> getCptJsonSchema() {
-        return cptJsonSchema;
-    }
+	public void setDid(String did) {
+		this.did = did;
+	}
 
-    public void setCptJsonSchema(Map<String, JsonSchema> cptJsonSchema) {
-        this.cptJsonSchema = cptJsonSchema;
-    }
+	public Map<String, JsonSchema> getCptJsonSchema() {
+		return cptJsonSchema;
+	}
 
-    public String getTitle() {
-        return title;
-    }
+	public void setCptJsonSchema(Map<String, JsonSchema> cptJsonSchema) {
+		this.cptJsonSchema = cptJsonSchema;
+	}
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public String getType() {
-        return type;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public void setType(String type) {
-        this.type = type;
-    }
+	public String getType() {
+		return type;
+	}
 
+	public void setType(String type) {
+		this.type = type;
+	}
 
 	public Proof getProof() {
 		return proof;
@@ -124,5 +118,5 @@ public class RegisterCptWrapper implements Serializable {
 	public void setUpdate(String update) {
 		this.update = update;
 	}
-	
+
 }

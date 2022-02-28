@@ -86,14 +86,14 @@ public class SignaturesTest {
     @Test
     public void testSign2() {
         Signatures getResult = Signatures.get();
-        getResult.add("签名验签的字符串为= ", "Value");
+        getResult.add("sign string =", "Value");
         assertThrows(RuntimeException.class, () -> getResult.sign("Private Key"));
     }
 
     @Test
     public void testSign3() {
         Signatures getResult = Signatures.get();
-        getResult.add("签名验签的字符串为= ", "Value");
+        getResult.add("sign string =", "Value");
         assertEquals("9KgsyB87v8G5gndNgMDQk2q5nD/BSMYmQxu0VxNqTbBbk+ug+qKFELked2SjQxc3SXmXFWmsSzjIwJzXS1pEsgE=",
                 getResult.sign("42"));
     }
@@ -110,7 +110,7 @@ public class SignaturesTest {
     @Test
     public void testVerify2() {
         Signatures getResult = Signatures.get();
-        getResult.add("签名验签的字符串为= ", "Value");
+        getResult.add("sign string =", "Value");
         assertThrows(RuntimeException.class, () -> getResult.verify("Public Key", "42"));
     }
 
@@ -122,7 +122,7 @@ public class SignaturesTest {
     @Test
     public void testGetSignStr2() {
         Signatures getResult = Signatures.get();
-        getResult.add("签名验签的字符串为= ", "Value");
+        getResult.add("sign string =", "Value");
         assertEquals("nullnullnull\"Value\"", getResult.getSignStr());
     }
 }

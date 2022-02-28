@@ -9,18 +9,16 @@ import cn.hutool.core.util.RandomUtil;
 public class GenerateCptIdUtils {
 
 	/**
-	 * 
 	 * generated a CPT template Id utils function
 	 * 
-	 * @return
+	 * @return return the Id value
 	 */
-    public static long getId()
-    {
-        StringBuffer generateId = new StringBuffer();
-        generateId.append(RandomUtil.randomString("123456789", 2))
-                .append(DateUtil.format(DateUtil.date(), "yyMMddHHmmssSSS"))
-                .append(RandomUtil.randomString("123456789", 1));
-        return Long.parseLong(generateId.toString());
-    }
+	public static long getId() {
+		StringBuffer generateId = new StringBuffer();
+		generateId.append(RandomUtil.randomString("123456789", 2))
+				.append(DateUtil.format(DateUtil.date(), "yyMMddHHmmssSSS"))
+				.append(RandomUtil.randomString("123456789", 1));
+		return Long.parseLong(generateId.toString());
+	}
 
 }

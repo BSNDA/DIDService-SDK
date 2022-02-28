@@ -2,32 +2,25 @@ package com.reddate.did.sdk.protocol.response.hub;
 
 import java.io.Serializable;
 
-
 /**
- * 
  * Save resource response data structure
- * 
- *
  */
 public class SaveResourceResp implements Serializable {
 
 	/**
 	 * resource url
-	 * 
 	 */
-	  private String url;
+	private String url;
 
-	  /**
-	   * encrypt key information
-	   * 
-	   */
-	  private String encryptKey;
-	  
-	  /**
-	   * userid
-	   * 
-	   */
-	  private String uid;
+	/**
+	 * encrypt key information
+	 */
+	private String encryptKey;
+
+	/**
+	 * user Id
+	 */
+	private String uid;
 
 	public String getUrl() {
 		return url;
@@ -52,5 +45,5 @@ public class SaveResourceResp implements Serializable {
 	public void setUid(String uid) {
 		this.uid = uid;
 	}
-	  
+
 }

@@ -3,26 +3,23 @@
 package com.reddate.did.sdk.param.req;
 
 /**
- * 
  * Can grant permission information data structure
- * 
- *
  */
 public enum Operation {
-  /**
-   * Write permission
-   */
-  WRITE,
-  /**
-   * Update permission
-   */
-  UPDATE,
-  /**
-   * Read permission
-   */
-  READ,
-  /**
-   * Delete permission
-   */
-  DELETE
+	/**
+	 * Write permission
+	 */
+	WRITE,
+	/**
+	 * Update permission
+	 */
+	UPDATE,
+	/**
+	 * Read permission
+	 */
+	READ,
+	/**
+	 * Delete permission
+	 */
+	DELETE
 }

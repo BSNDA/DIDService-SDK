@@ -4,22 +4,16 @@ import java.io.Serializable;
 
 /**
  * Registe hubdata structure
- * 
- * 
- *
  */
-public class RegisterHubReq implements Serializable{
+public class RegisterHubReq implements Serializable {
 
 	/**
 	 * did idnetify
-	 * 
 	 */
 	private String did;
-	
+
 	/**
 	 * public value String
-	 * 
-	 * 
 	 */
 	private String publicKey;
 
@@ -38,8 +32,5 @@ public class RegisterHubReq implements Serializable{
 	public void setPublicKey(String publicKey) {
 		this.publicKey = publicKey;
 	}
-	
-	
-	
-	
+
 }

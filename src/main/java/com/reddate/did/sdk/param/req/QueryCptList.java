@@ -2,34 +2,23 @@ package com.reddate.did.sdk.param.req;
 
 import java.io.Serializable;
 
-
 /**
- * 
  * Query CPT template list request data structure
- * 
- * 
- *
  */
 public class QueryCptList implements Serializable {
 
 	/**
-	 * 
 	 * current page number
-	 * 
 	 */
 	private Integer page;
-	
+
 	/**
-	 * 
 	 * page size
-	 * 
 	 */
 	private Integer size;
-	
+
 	/**
-	 * 
-	 * did identifier 
-	 * 
+	 * did identifier
 	 */
 	private String did;
 

@@ -4,28 +4,21 @@ import java.io.Serializable;
 
 /**
  * Query resource request data structure
- * 
- * 
- *
  */
-public class QueryResourceReq implements HubBaseReq,Serializable{
+public class QueryResourceReq implements HubBaseReq, Serializable {
 
 	/**
 	 * user id
-	 * 
 	 */
 	private String uid;
-	
+
 	/**
 	 * resource url
-	 * 
 	 */
 	private String url;
-	
+
 	/**
-	 * 
 	 * sign value
-	 * 
 	 */
 	private String sign;
 
@@ -52,23 +45,19 @@ public class QueryResourceReq implements HubBaseReq,Serializable{
 	public void setSign(String sign) {
 		this.sign = sign;
 	}
-	
-	
+
 	@Override
 	public String contractToString() {
 		StringBuffer buffer = new StringBuffer();
-		if(uid != null) {
+		if (uid != null) {
 			buffer.append(uid);
 		}
-		
-		if(url != null) {
+
+		if (url != null) {
 			buffer.append(url);
 		}
-		
+
 		return buffer.toString();
 	}
 
-
-	
-	
 }

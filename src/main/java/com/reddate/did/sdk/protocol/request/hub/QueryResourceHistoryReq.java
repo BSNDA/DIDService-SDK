@@ -2,33 +2,36 @@ package com.reddate.did.sdk.protocol.request.hub;
 
 import java.io.Serializable;
 
+import com.reddate.did.sdk.param.req.Operation;
+
 /**
- * delete permission request data structure
+ * query resource history request data structure
+ * 
+ *
  */
-public class DeletePermissionReq implements HubBaseReq, Serializable {
+public class QueryResourceHistoryReq implements HubBaseReq,Serializable{
 
 	/**
 	 * user id
+	 * 
 	 */
 	private String uid;
 
 	/**
 	 * resource url
+	 * 
 	 */
 	private String url;
-
+	
 	/**
-	 * grant user id
+	 * used flag
+	 * 
 	 */
-	private String grantUid;
-
-	/**
-	 * grant information
-	 */
-	private String grant;
+	private String operation;
 
 	/**
 	 * sign value
+	 * 
 	 */
 	private String sign;
 
@@ -48,20 +51,12 @@ public class DeletePermissionReq implements HubBaseReq, Serializable {
 		this.url = url;
 	}
 
-	public String getGrantUid() {
-		return grantUid;
+	public String getOperation() {
+		return operation;
 	}
 
-	public void setGrantUid(String grantUid) {
-		this.grantUid = grantUid;
-	}
-
-	public String getGrant() {
-		return grant;
-	}
-
-	public void setGrant(String grant) {
-		this.grant = grant;
+	public void setOperation(String operation) {
+		this.operation = operation;
 	}
 
 	public String getSign() {
@@ -75,20 +70,19 @@ public class DeletePermissionReq implements HubBaseReq, Serializable {
 	@Override
 	public String contractToString() {
 		StringBuffer buffer = new StringBuffer();
-
-		if (uid != null) {
+		if(uid != null) {
 			buffer.append(uid);
 		}
-		if (url != null) {
+		
+		if(url != null) {
 			buffer.append(url);
 		}
-		if (grantUid != null) {
-			buffer.append(grantUid);
-		}
-		if (grant != null) {
-			buffer.append(grant);
+
+		if(operation != null) {
+			buffer.append(operation);
 		}
 		return buffer.toString();
 	}
-
+	
+	
 }

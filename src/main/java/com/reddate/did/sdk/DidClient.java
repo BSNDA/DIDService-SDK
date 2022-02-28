@@ -2,7 +2,9 @@ package com.reddate.did.sdk;
 
 import java.util.List;
 
+import com.reddate.did.sdk.constant.ErrorMessage;
 import com.reddate.did.sdk.exception.DidException;
+import com.reddate.did.sdk.param.CryptoType;
 import com.reddate.did.sdk.param.req.AuthIssuerList;
 import com.reddate.did.sdk.param.req.CheckPermission;
 import com.reddate.did.sdk.param.req.CreateCredential;
@@ -10,15 +12,19 @@ import com.reddate.did.sdk.param.req.CreatePermission;
 import com.reddate.did.sdk.param.req.DeletePermission;
 import com.reddate.did.sdk.param.req.QueryCptList;
 import com.reddate.did.sdk.param.req.QueryCredentialList;
+import com.reddate.did.sdk.param.req.QueryGrantedPermission;
 import com.reddate.did.sdk.param.req.QueryPermission;
+import com.reddate.did.sdk.param.req.QueryResourceHistory;
 import com.reddate.did.sdk.param.req.RegisterAuthorityIssuer;
 import com.reddate.did.sdk.param.req.RegisterCpt;
 import com.reddate.did.sdk.param.req.ResetDidAuth;
 import com.reddate.did.sdk.param.req.RevokeCredential;
 import com.reddate.did.sdk.param.req.SaveResource;
 import com.reddate.did.sdk.param.resp.DidDataWrapper;
+import com.reddate.did.sdk.param.resp.GrantPermissionInfo;
 import com.reddate.did.sdk.param.resp.PermissionInfo;
 import com.reddate.did.sdk.param.resp.RegisterHubResult;
+import com.reddate.did.sdk.param.resp.ResourceHistoryInfo;
 import com.reddate.did.sdk.param.resp.SaveResourceResult;
 import com.reddate.did.sdk.protocol.common.DidDocument;
 import com.reddate.did.sdk.protocol.common.KeyPair;
@@ -33,27 +39,26 @@ import com.reddate.did.sdk.service.AuthIssuerService;
 import com.reddate.did.sdk.service.CredentialService;
 import com.reddate.did.sdk.service.DidService;
 import com.reddate.did.sdk.service.HubService;
+import com.reddate.did.sdk.util.AesUtils;
+import com.reddate.did.sdk.util.Secp256Util;
+
 /**
+ * Did SDK main class, all the BSN did service can be called by this class
+ * method.
  * 
- * Did SDK main class, all the BSN did service can be called by this class method.
- * 
- * Before call BSN did service, you need create did client instance.
- * for example:
- *  String url = "https://didservice.bsngate.com:18602";
- *  String token = "3wxYHXwAm57grc9JUr2zrPHt9HC";
- *  String projectId = "8320935187";
- *  DidClient didClient = new DidClient(url,projectId,token);
- *  
- *
+ * Before call BSN did service, you need create did client instance. for
+ * example: String url = "https://didservice.bsngate.com:18602"; String token =
+ * "3wxYHXwAm57grc9JUr2zrPHt9HC"; String projectId = "8320935187"; DidClient
+ * didClient = new DidClient(url,projectId,token);
  */
 public class DidClient {
-	
+
 	/**
 	 * Did module service logic implement class
 	 * 
 	 */
 	private DidService didService;
-	
+
 	/**
 	 * Authenticate module service logic implement class
 	 * 
@@ -65,33 +70,33 @@ public class DidClient {
 	 * 
 	 */
 	private CredentialService credentialService;
-	
+
 	/**
 	 * Identify HUB module service logic implement class
 	 * 
 	 */
 	private HubService hubService;
-	
+
 	/**
 	 * Did client construct
 	 * 
 	 * 
-	 * @param url  BSN did service URL
-	 * @param projectId  The project Id of BSN assign
-	 * @param token The Token of BSN assign
+	 * @param url       BSN did service URL
+	 * @param projectId The project Id of BSN assign
+	 * @param token     The Token of BSN assign
 	 */
-	public DidClient(String url,String projectId,String token) {
-		didService = new DidService(url, projectId, token); 
+	public DidClient(String url, String projectId, String token) {
+		didService = new DidService(url, projectId, token);
 		authIssuerService = new AuthIssuerService(url, projectId, token);
 		credentialService = new CredentialService(url, projectId, token);
 		hubService = new HubService(url, projectId, token);
 	}
-	
+
 	/**
+	 * Create did document and store this document on block chain if choose store on
+	 * block chain.
 	 * 
-	 * Create did document and store this document on block chain if choose store on block chain.
-	 * 
-	 * @param isStorageOnChain Store generated did document store on block chain 
+	 * @param isStorageOnChain Store generated did document store on block chain
 	 * @return The did Identifier, generated did document and key pair.
 	 */
 	public DidDataWrapper createDid(Boolean isStorageOnChain) {
@@ -102,22 +107,21 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("create did failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
-		
-		if(!genDidResult.isSuccess()) {
-			throw new DidException(genDidResult.getMsg());
+
+		if (!genDidResult.isSuccess()) {
+			throw new DidException(genDidResult.getCode(), genDidResult.getMsg());
 		}
-		
+
 		return genDidResult.getData();
 	}
-	
+
 	/**
+	 * Verify the did document format and sign is correct or not, this function will
+	 * verify the document format and the document sign.
 	 * 
-	 * Verify the did document format and sign is correct or not,
-	 * this function will verify the document format and the document sign.
-	 * 
-	 * @param didDocument Did Document Did document content
+	 * @param didDocument Did document content
 	 * @return The verify result.
 	 */
 	public Boolean verifyDidDocument(DidDocument didDocument) {
@@ -128,24 +132,22 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("verify did document failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 
-		if(!verifyResult.isSuccess()) {
-			throw new DidException(verifyResult.getMsg());
+		if (!verifyResult.isSuccess()) {
+			throw new DidException(verifyResult.getCode(), verifyResult.getMsg());
 		}
 		return verifyResult.getData();
 	}
-	
+
 	/**
-	 * 
-	 * Store a generated did document to block chain.
-	 * this function verify the document first,
-	 * then store the document on the block chain.
+	 * Storing a generated did document On-chain. this function verify the document
+	 * content first, then store the document On-chain.
 	 * 
 	 * 
-	 * @param didDocument The did document detail information
-	 * @return The did document store result
+	 * @param didDocument The did document content
+	 * @return document On-chain result
 	 */
 	public Boolean storeDidDocumentOnChain(DidDocument didDocument) {
 		ResultData<Boolean> storeResult = null;
@@ -155,21 +157,21 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("store did document on chain failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 
-		if(!storeResult.isSuccess()) {
-			throw new DidException(storeResult.getMsg());
+		if (!storeResult.isSuccess()) {
+			throw new DidException(storeResult.getCode(), storeResult.getMsg());
 		}
 		return true;
 	}
-	
+
 	/**
+	 * Query the did document content on the block chain. The DID Document contains
+	 * the user's DID identifier, generation time, update time, public key,
+	 * encryption algorithm, signature information, etc.
 	 * 
-	 * Query the did document on the block chain
-	 * 
-	 * 
-	 * @param did  Did identify
+	 * @param did Did identify
 	 * @return The did document detail information
 	 */
 	public DidDocument getDidDocument(String did) {
@@ -180,23 +182,21 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("get did document failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 
-		if(!queryDidDocResult.isSuccess()) {
-			throw new DidException(queryDidDocResult.getMsg());
+		if (!queryDidDocResult.isSuccess()) {
+			throw new DidException(queryDidDocResult.getCode(), queryDidDocResult.getMsg());
 		}
 		return queryDidDocResult.getData();
 	}
-	
+
 	/**
+	 * The user completes the master public and private key update through the
+	 * recovery public and private keys. After the key is updated, the user's DID
+	 * Document will also be updated, but the DID identifier will not change.
 	 * 
-	 * Reset the main public key in the did document on block chain. 
-	 * this function first validate the recovery key, 
-	 * after recovery pass, then reset the main public key in this document on block chain.
-	 * 
-	 * 
-	 * @param restDidAuth  Rest the did document key information.
+	 * @param restDidAuth Rest the did document key information.
 	 * @return Return the reset main public key result
 	 */
 	public KeyPair resetDidAuth(ResetDidAuth restDidAuth) {
@@ -207,22 +207,21 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("reset did auth failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
-		
-		if(!restAuth.isSuccess()) {
-			throw new DidException(restAuth.getMsg());
+
+		if (!restAuth.isSuccess()) {
+			throw new DidException(restAuth.getCode(), restAuth.getMsg());
 		}
 
 		return restAuth.getData();
 	}
-	
+
 	/**
 	 * 
-	 * Register a did to be a authority issuer,
-	 * this function validate the did is on block chain, 
-	 * and validate it is not a authority issuer, 
-	 * and register it to be a issuer.
+	 * Register a did to be a authority issuer, this function validate the did is on
+	 * block chain, and validate it is not a authority issuer, and register it to be
+	 * a issuer.
 	 * 
 	 * 
 	 * @param register Register authority issuer information.
@@ -235,36 +234,41 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("register authIssuer failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
-	 * 
 	 * Query the registered authority issuer list form the block chain.
+	 * 
+	 * The issuer information is public on the chain, so anyone can find all the
+	 * issuers, but the DID identifier of the issuer is not returned by default. At
+	 * the same time, it also supports query through the DID identifier of the
+	 * issuing party, and all the information on the chain of the issuing party can
+	 * be found.
 	 * 
 	 * @param query The page info and did identify
 	 * @return return the authority list
 	 */
-	public Pages<AuthorityIssuer> queryAuthIssuerList(AuthIssuerList query){
+	public Pages<AuthorityIssuer> queryAuthIssuerList(AuthIssuerList query) {
 		try {
 			return authIssuerService.queryAuthIssuerList(query);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("query authIssuer list failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
-	 * Register a CPT template for the authority issuer,
-	 * this function validate the authority issuer and CPT template information first,
-	 * then add this CPT template on the block chain.
+	 * Register a CPT template for the authority issuer, this function validate the
+	 * authority issuer and CPT template information first, then add this CPT
+	 * template on the block chain.
 	 * 
 	 * 
 	 * @param registerCpt Register CPT template information
-	 * @return  Return the CPT template Id,and CPT template version
+	 * @return Return the CPT template Id,and CPT template version
 	 */
 	public CptBaseInfo registerCpt(RegisterCpt registerCpt) {
 		try {
@@ -273,20 +277,18 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("register cpt failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
-	 * Query the register CPT template on the block chain
+	 * Query all registered CPT templates under the issuer according to the DID
+	 * identifier of the issuer.
 	 * 
-	 * 
-	 * @param query Page information and authority issuer 
+	 * @param query Page information and authority issuer
 	 * @return Return the CPT template list
-	 * 
 	 */
-	public Pages<CptInfo> queryCptListByDid(QueryCptList query){
-		
+	public Pages<CptInfo> queryCptListByDid(QueryCptList query) {
 		Pages<CptInfo> cptPages = null;
 		try {
 			cptPages = authIssuerService.queryCptListByDid(query);
@@ -294,38 +296,32 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("query cptList failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
-		
+
 		return cptPages;
 	}
-	
+
 	/**
+	 * Query CPT declaration information based on the CPT template ID.
 	 * 
-	 * Query the register CPT template detail information on the block chain
-	 * 
-	 * 
-	 * 
-	 * @param cptId  The CPT template Id
-	 * @return Return  the CPT template detail information
+	 * @param cptId The CPT template Id
+	 * @return Return the CPT template detail information
 	 */
 	public CptInfo queryCptById(Long cptId) {
 		try {
-  			return authIssuerService.queryCptById(cptId);
+			return authIssuerService.queryCptById(cptId);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("query cpt failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
-		
 	}
-	
+
 	/**
-	 * 
-	 * Update the registered CPT template on the block chain,
-	 * this function validate the new CPT template information and check if can update.
-	 * 
+	 * The issuer updates the declaration content in the CPT template that it has
+	 * already registered.
 	 * 
 	 * @param registerCpt Update CPT template information
 	 * @return Return the new CPT template Id and version
@@ -337,16 +333,21 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("update cpt failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
-	 * Generate and issue a new credential base on the CPT template and input information 
+	 * Generate and issue a new credential base on the CPT template and input
+	 * information
 	 * 
+	 * The issuer issues a certificate for the user according to the content of the
+	 * certificate application filled in by the user. The certificate needs the
+	 * signature of the issuer, so the issuer needs to pass in the master private
+	 * key to sign.
 	 * 
 	 * @param createCredential The credential field values
-	 * @return Return a issued credential 
+	 * @return Return a issued credential
 	 */
 	public CredentialWrapper createCredential(CreateCredential createCredential) {
 		try {
@@ -355,36 +356,39 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("create credential failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
+	 * Verify that the credentials are reality and valid.
 	 * 
-	 * Verify the issued credential is changed or not,
-	 * this function validate the credential format and credential sign
+	 * Through certificate verification, the authenticity of the certificate can be
+	 * identified. Each certificate is signed by the issuing authentication private
+	 * key, so as long as the signature is verified, it means that the certificate
+	 * itself is true. On this basis, re-verify the validity period of the
+	 * certificate and whether it has been revoked. If it passes, it means that the
+	 * certificate is acceptable.
 	 * 
-	 * 
-	 * @param createCredential  Credential detail information
-	 * @param publicKey Public key information
+	 * @param createCredential Credential detail information
+	 * @param publicKey        Public key information
 	 * @return Return the verify result
 	 */
-	public Boolean verifyCredential(CredentialWrapper createCredential,PublicKey publicKey) {
+	public Boolean verifyCredential(CredentialWrapper createCredential, PublicKey publicKey) {
 		try {
-			return credentialService.verifyCredential(createCredential,publicKey);
+			return credentialService.verifyCredential(createCredential, publicKey);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("verify credential failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
-	
+
 	/**
 	 * 
-	 * revoke issued credential on block chain, 
-	 * add this credential to the revoke credential list on block chain.
+	 * revoke issued credential on block chain, add this credential to the revoke
+	 * credential list on block chain.
 	 * 
 	 * 
 	 * @param cred Want to revoke credential information
@@ -397,187 +401,249 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("revoke credential failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
-	 * Query the revoked credential list on the block chain
+	 * Query the revoked credential and and the revocation time, can query by the
+	 * crednential's issuer did, also can query by the credential Id
 	 * 
-	 * 
-	 * @param queryCredentialList  Page information and authority issuer did
+	 * @param queryCredentialList Paging information and authority issuer did
 	 * @return Return the credential List
 	 */
-	public Pages<BaseCredential> getRevokedCredList(QueryCredentialList queryCredentialList){
+	public Pages<BaseCredential> getRevokedCredList(QueryCredentialList queryCredentialList) {
 		try {
-			return  credentialService.getRevokedCredList(queryCredentialList);
+			return credentialService.getRevokedCredList(queryCredentialList);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("query revoke credential failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
-	 * 
 	 * Register and did user to be a identify hub user.
 	 * 
-	 * 
-	 * 
-	 * @param did The register did user
+	 * @param did       The register did user
 	 * @param publicKey This did user's public key
 	 * @return Return the register result
 	 */
-	public RegisterHubResult registerHub(String did,String publicKey){
+	public RegisterHubResult registerHub(String did, String publicKey) {
 		try {
-			return  hubService.registerHub(did, publicKey);
+			return hubService.registerHub(did, publicKey);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("register hub failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
-	 * Save one resource to the identify hub,
-	 * this function validate the user permission first, 
-	 * then save the resource to the identify hub if have permission 
-	 * 
+	 * Save one resource to the identify hub, this function validate the user
+	 * permission first, then save the resource to the identify hub if have
+	 * permission
 	 * 
 	 * @param saveResource Save resource detail information
 	 * @return Return the saved resource and encrypt Key
 	 */
-	public SaveResourceResult saveResource(SaveResource saveResource){
+	public SaveResourceResult saveResource(SaveResource saveResource) {
 		try {
-			return  hubService.saveResource(saveResource);
+			return hubService.saveResource(saveResource);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("register hub failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
+	 * Query the saved resource in the identify hub, return the saved resource
+	 * information
 	 * 
-	 * Query the saved resource in the identify hub,
-	 * return the saved resource information
-	 * 
-	 * @param did The identify hub user's did
+	 * @param did        The identify hub user's did
 	 * @param privateKey The identify hub user's private key
-	 * @param url The resource URL in identify hub
+	 * @param url        The resource URL in identify hub
 	 * @return Return the resource encrypt content and encrypt Key
 	 */
-	public QueryResourceResp getResource(String did,String privateKey, String url) {
+	public QueryResourceResp getResource(String did, String privateKey, String url) {
 		try {
-			return  hubService.getResource(did, privateKey, url);
+			return hubService.getResource(did, privateKey, url);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("query reource from hub failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
+	 * Delete the resource in the identify hub, this function validate the identify
+	 * hub user's permission first, if this user have permission, then delete this
+	 * permission.
 	 * 
-	 * Delete the resource in the identify hub,
-	 * this function validate the identify hub user's permission first,
-	 * if this user have permission, then delete this permission.
-	 * 
-	 * 
-	 * @param did  The identify hub user's did
-	 * @param privateKey  The identify hub user's private key
-	 * @param url  The  resource user in identify hub
+	 * @param did        The identify hub user's did
+	 * @param privateKey The identify hub user's private key
+	 * @param url        The resource user in identify hub
 	 * @return Return the delete result
 	 */
-	public Boolean deleteResource(String did,String privateKey, String url) {
+	public Boolean deleteResource(String did, String privateKey, String url) {
 		try {
-			return  hubService.deleteResource(did, privateKey, url);
-					
+			return hubService.deleteResource(did, privateKey, url);
+
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("delete reource on hub failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
+	 * Resource owner creates permission to access dataHub for other user.
 	 * 
-	 * Create a permission for other identify hub user
-	 * 
-	 * 
+	 * One user can only request the resource owner add grant permission, and only
+	 * the resource owner can grant permission to other user.
 	 * 
 	 * @param createPermission Create permission information
 	 * @return Return the crate permission information
 	 */
 	public CreatePermissionResp createPermission(CreatePermission createPermission) {
 		try {
-			return  hubService.createPermission(createPermission);
+			return hubService.createPermission(createPermission);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("create permission on hub failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
+	 * The user logically deletes the grant that has been created but has not been
+	 * used.
 	 * 
-	 * Delete the granted permission for other user
+	 * Deleting permission can only be invoked by the resource owner. the permission
+	 * record that has not been used is logically deleted.
 	 * 
 	 * @param deletePermission Permission Information
 	 * @return Return the delete permission information
 	 */
 	public DeletePermissionResp deletePermission(DeletePermission deletePermission) {
 		try {
-			return  hubService.deletePermission(deletePermission);	
+			return hubService.deletePermission(deletePermission);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("delete permission on hub failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
+	 * Users query the permissions of authorized third-party visitors.
 	 * 
-	 * Query the granted permission information list
+	 * Users can query all or part of the grant records from the grant's hubId and
+	 * whether they have used.
 	 * 
 	 * @param queryPermission Query permission condition
 	 * @return Return the permission Information list
 	 */
-	public List<PermissionInfo> queryPermission(QueryPermission queryPermission){
+	public List<PermissionInfo> queryPermission(QueryPermission queryPermission) {
 		try {
-			return  hubService.queryPermission(queryPermission)	;
+			return hubService.queryPermission(queryPermission);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("query permission on hub failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
 	/**
+	 * Query the granted permission information list to yourself
 	 * 
-	 * Check if one identify hub user have WREAD/WRITE/UPDATE/DELTE permission to a resource
+	 * Users can query all or part of the authorization records from the ownner's
+	 * hubId and whether they have used.
 	 * 
+	 * @param queryPermission Query permission condition
+	 * @return Return the permission Information list
+	 */
+	public List<GrantPermissionInfo> queryGrantedPermission(QueryGrantedPermission queryPermission) {
+		try {
+			return hubService.queryGrantPermission(queryPermission);
+		} catch (DidException e) {
+			throw e;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+		}
+	}
+
+	/**
+	 * Check if one hub user have WREAD/WRITE/UPDATE/DELTE permission for a
+	 * resource. The resource owner have the resource WREAD/WRITE/UPDATE/DELTE
+	 * permission. THe granted permission user have the granted user.
 	 * 
 	 * @param check Permission permission and resource information
-	 * @return Return the check result
+	 * @return Return the check permission result
 	 */
-	public CheckPermissionResp checkPermission(CheckPermission checkPermission){
+	public CheckPermissionResp checkPermission(CheckPermission checkPermission) {
 		try {
-			return  hubService.checkPermission(checkPermission);
+			return hubService.checkPermission(checkPermission);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException("check permission on hub failed:"+e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
 		}
 	}
-	
+
+	/**
+	 * Query the modification history operation records of your own resources,
+	 * including save, update, and delete operations history.
+	 * 
+	 * @param queryResourceHistory Query resource history request param
+	 * @return Return the resource operation history Information list
+	 */
+	public List<ResourceHistoryInfo> queryResourceHistory(QueryResourceHistory queryResourceHistory) {
+		try {
+			return hubService.queryResourceHistory(queryResourceHistory);
+		} catch (DidException e) {
+			throw e;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+		}
+	}
+
+	/**
+	 * Decrypt ciphertext secret key and ciphertext content, decrypt the secret key
+	 * by Secp256k1 algorithm, decrypt the content by the AES-ECDSA algorithm.
+	 * 
+	 * @param content    the ciphertext content
+	 * @param encptyKey  the ciphertext secret key
+	 * @param privateKey the private key
+	 * @return return the plaintext content
+	 */
+	public static String decrypt(String content, String encptyKey, String privateKey) {
+		String key = null;
+		try {
+			key = Secp256Util.decrypt(CryptoType.ECDSA, encptyKey, privateKey);
+		} catch (Exception e) {
+			// throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.DECRYPT_KEY_FAILED.getCode(),
+					ErrorMessage.DECRYPT_KEY_FAILED.getMessage() + ": " + e.getMessage());
+		}
+		try {
+			return AesUtils.decrypt(content, key);
+		} catch (Exception e) {
+			// throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.DECRYPT_CONTENT_FAILED.getCode(),
+					ErrorMessage.DECRYPT_CONTENT_FAILED.getMessage() + ": " + e.getMessage());
+		}
+	}
 }
