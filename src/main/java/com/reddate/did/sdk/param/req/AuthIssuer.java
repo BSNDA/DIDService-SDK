@@ -3,7 +3,7 @@ package com.reddate.did.sdk.param.req;
 /**
  * Authority issuer list description data structure
  */
-public class AuthIssuerList {
+public class AuthIssuer {
 
 	/**
 	 * current page number

@@ -8,19 +8,19 @@ import java.io.Serializable;
 public class CheckPermission implements Serializable {
 
 	/**
-	 * did identifier
+	 * user id
 	 */
-	private String did;
+	private String uid;
 
 	/**
-	 * resource owner did
+	 * resource owner user id
 	 */
-	private String ownerDid;
+	private String ownerUid;
 
 	/**
 	 * grant user did
 	 */
-	private String grantDid;
+	private String grantUid;
 
 	/**
 	 * resource url
@@ -37,20 +37,28 @@ public class CheckPermission implements Serializable {
 	 */
 	private String privateKey;
 
-	public String getDid() {
-		return did;
+	public String getUid() {
+		return uid;
 	}
 
-	public void setDid(String did) {
-		this.did = did;
+	public void setUid(String uid) {
+		this.uid = uid;
 	}
 
-	public String getGrantDid() {
-		return grantDid;
+	public String getOwnerUid() {
+		return ownerUid;
 	}
 
-	public void setGrantDid(String grantDid) {
-		this.grantDid = grantDid;
+	public void setOwnerUid(String ownerUid) {
+		this.ownerUid = ownerUid;
+	}
+
+	public String getGrantUid() {
+		return grantUid;
+	}
+
+	public void setGrantUid(String grantUid) {
+		this.grantUid = grantUid;
 	}
 
 	public String getUrl() {
@@ -75,14 +83,6 @@ public class CheckPermission implements Serializable {
 
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
-	}
-
-	public String getOwnerDid() {
-		return ownerDid;
-	}
-
-	public void setOwnerDid(String ownerDid) {
-		this.ownerDid = ownerDid;
 	}
 
 }

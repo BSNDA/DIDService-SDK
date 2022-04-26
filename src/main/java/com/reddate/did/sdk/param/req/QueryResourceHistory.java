@@ -8,9 +8,9 @@ import java.io.Serializable;
 public class QueryResourceHistory implements Serializable{
 
 	/**
-	 * did identifier
+	 * user id
 	 */
-	private String did;
+	private String uid;
 
 	/**
 	 * resource url
@@ -27,14 +27,14 @@ public class QueryResourceHistory implements Serializable{
 	 */
 	private String privateKey;
 
-	public String getDid() {
-		return did;
+	public String getUid() {
+		return uid;
 	}
 
-	public void setDid(String did) {
-		this.did = did;
+	public void setUid(String uid) {
+		this.uid = uid;
 	}
-	
+
 	public String getUrl() {
 		return url;
 	}
@@ -58,5 +58,5 @@ public class QueryResourceHistory implements Serializable{
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
 	}
-
+	
 }

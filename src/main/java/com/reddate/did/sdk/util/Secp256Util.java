@@ -19,11 +19,11 @@ import org.fisco.bcos.web3j.crypto.tool.ECCDecrypt;
 import org.fisco.bcos.web3j.crypto.tool.ECCEncrypt;
 import org.fisco.bcos.web3j.utils.Numeric;
 
-import com.google.common.base.Charsets;
+import com.reddate.did.sdk.constant.ErrorMessage;
+import com.reddate.did.sdk.exception.DidException;
 import com.reddate.did.sdk.param.CryptoType;
 import com.reddate.did.sdk.param.KeyPair;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.Security;
@@ -49,14 +49,18 @@ public class Secp256Util {
 	 * @return
 	 * @throws Exception
 	 */
-	public static KeyPair createKeyPair(CryptoType cryptoType) throws Exception {
+	public static KeyPair createKeyPair(CryptoType cryptoType) {
 		KeyPair keyPair = new KeyPair();
 		ECKeyPair ecKeyPair = null;
 		if (cryptoType == CryptoType.SM) {
 			ecKeyPair = GenCredential.createGuomiKeyPair();
 			keyPair.setType(CryptoType.SM);
 		} else {
-			ecKeyPair = Keys.createEcKeyPair();
+			try {
+				ecKeyPair = Keys.createEcKeyPair();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 			keyPair.setType(CryptoType.ECDSA);
 		}
 		keyPair.setPrivateKey(ecKeyPair.getPrivateKey().toString());
@@ -94,7 +98,7 @@ public class Secp256Util {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String getAddress(CryptoType cryptoType, String privateKey) throws Exception {
+	public static String getAddress(CryptoType cryptoType, String privateKey) {
 		ECKeyPair ecKeyPair = null;
 
 		String hexPrivateKey = new BigInteger(privateKey).toString(16);
@@ -138,19 +142,23 @@ public class Secp256Util {
 	 * @param data
 	 * @param publicKey
 	 * @return
-	 * @throws Exception
 	 */
-	public static String encrypt(CryptoType cryptoType, String data, String publicKey) throws Exception {
-		if (cryptoType == CryptoType.SM) {
-			byte[] pub = Numeric.toBytesPadded(new BigInteger(publicKey), 64);
-			String hexPbkX = org.bouncycastle.util.encoders.Hex.toHexString(pub, 0, 32);
-			String hexPbkY = org.bouncycastle.util.encoders.Hex.toHexString(pub, 32, 32);
-			byte[] tt = SM2Algorithm.encrypt(hexPbkX, hexPbkY, data.getBytes(Charsets.UTF_8));
-			return Numeric.toHexString(tt).substring(2);
-		} else {
-			ECCEncrypt eccEncrypt = new ECCEncrypt(new BigInteger(publicKey));
-			byte[] encBytes = eccEncrypt.encrypt(data.getBytes(StandardCharsets.UTF_8));
-			return Numeric.toHexString(encBytes).substring(2);
+	public static String encrypt(CryptoType cryptoType, String data, String publicKey) {
+		try {
+			if (cryptoType == CryptoType.SM) {
+				byte[] pub = Numeric.toBytesPadded(new BigInteger(publicKey), 64);
+				String hexPbkX = org.bouncycastle.util.encoders.Hex.toHexString(pub, 0, 32);
+				String hexPbkY = org.bouncycastle.util.encoders.Hex.toHexString(pub, 32, 32);
+				byte[] tt = SM2Algorithm.encrypt(hexPbkX, hexPbkY, data.getBytes(StandardCharsets.UTF_8));
+				return Numeric.toHexString(tt).substring(2);
+			} else {
+				ECCEncrypt eccEncrypt = new ECCEncrypt(new BigInteger(publicKey));
+				byte[] encBytes = eccEncrypt.encrypt(data.getBytes(StandardCharsets.UTF_8));
+				return Numeric.toHexString(encBytes).substring(2);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DidException(ErrorMessage.ENCRYPT_FAILED.getCode(), ErrorMessage.ENCRYPT_FAILED.getMessage());
 		}
 	}
 
@@ -161,17 +169,21 @@ public class Secp256Util {
 	 * @param data
 	 * @param privateKey
 	 * @return
-	 * @throws Exception
 	 */
-	public static String decrypt(CryptoType cryptoType, String data, String privateKey) throws Exception {
-		if (cryptoType == CryptoType.SM) {
-			String pvk = new BigInteger(privateKey).toString(16);
-			byte[] tt2 = SM2Algorithm.decrypt(pvk, Numeric.hexStringToByteArray(data));
-			return new String(tt2, Charsets.UTF_8);
-		} else {
-			ECCDecrypt eccDecrypt = new ECCDecrypt(new BigInteger(privateKey));
-			byte[] decryptTytes = eccDecrypt.decrypt(Numeric.hexStringToByteArray(data));
-			return new String(decryptTytes);
+	public static String decrypt(CryptoType cryptoType, String data, String privateKey) {
+		try {
+			if (cryptoType == CryptoType.SM) {
+				String pvk = new BigInteger(privateKey).toString(16);
+				byte[] tt2 = SM2Algorithm.decrypt(pvk, Numeric.hexStringToByteArray(data));
+				return new String(tt2, StandardCharsets.UTF_8);
+			} else {
+				ECCDecrypt eccDecrypt = new ECCDecrypt(new BigInteger(privateKey));
+				byte[] decryptTytes = eccDecrypt.decrypt(Numeric.hexStringToByteArray(data));
+				return new String(decryptTytes,StandardCharsets.UTF_8);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DidException(ErrorMessage.DECRYPT_FAILED.getCode(), ErrorMessage.DECRYPT_FAILED.getMessage());
 		}
 	}
 
@@ -181,19 +193,23 @@ public class Secp256Util {
 	 * @param cryptoType
 	 * @param message
 	 * @param privateKey
-	 * @return
-	 * @throws IOException
+	 * @return return the sign value
 	 */
-	public static String sign(CryptoType cryptoType, String message, String privateKey) throws IOException {
-		if (cryptoType == CryptoType.SM) {
-			Sign.SignatureData signatureData = SM2Sign.sign(message.getBytes(StandardCharsets.UTF_8),
-					GenCredential.createGuomiKeyPair(new BigInteger(privateKey).toString(16)));
-			return secp256k1SigBase64Serialization(signatureData);
-		} else {
-			ECDSASign ecdsaSign = new ECDSASign();
-			Sign.SignatureData signatureData = ecdsaSign.signMessage(message.getBytes(StandardCharsets.UTF_8),
-					GenCredential.createECDSAKeyPair(new BigInteger(privateKey).toString(16)));
-			return secp256k1SigBase64Serialization(signatureData);
+	public static String sign(CryptoType cryptoType, String message, String privateKey) {
+		try {
+			if (cryptoType == CryptoType.SM) {
+				Sign.SignatureData signatureData = SM2Sign.sign(message.getBytes(StandardCharsets.UTF_8),
+						GenCredential.createGuomiKeyPair(new BigInteger(privateKey).toString(16)));
+				return secp256k1SigBase64Serialization(signatureData);
+			} else {
+				ECDSASign ecdsaSign = new ECDSASign();
+				Sign.SignatureData signatureData = ecdsaSign.signMessage(message.getBytes(StandardCharsets.UTF_8),
+						GenCredential.createECDSAKeyPair(new BigInteger(privateKey).toString(16)));
+				return secp256k1SigBase64Serialization(signatureData);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DidException(ErrorMessage.SIGNATURE_FAILED.getCode(), ErrorMessage.SIGNATURE_FAILED.getMessage());
 		}
 	}
 
@@ -207,20 +223,25 @@ public class Secp256Util {
 	 * @return
 	 * @throws SignatureException
 	 */
-	public static boolean verify(CryptoType cryptoType, String message, String publicKey, String signValue)
-			throws SignatureException {
-		boolean verify = false;
-		if (cryptoType == CryptoType.SM) {
-			SM3Digest sm3Digest = new SM3Digest();
-			byte[] messageHash = sm3Digest.hash(message.getBytes(StandardCharsets.UTF_8));
-			verify = SM2Sign.verify(messageHash, secp256k1SigBase64Deserialization(signValue, publicKey));
-		} else {
-			ECDSASign ecdsaSign = new ECDSASign();
-			Sign.SignatureData signatureData = secp256k1SigBase64Deserialization(signValue, null);
-			byte[] messageHash = Hash.sha3(message.getBytes(StandardCharsets.UTF_8));
-			verify = ecdsaSign.verify(messageHash, new BigInteger(publicKey), signatureData);
+	public static boolean verify(CryptoType cryptoType, String message, String publicKey, String signValue) {
+		try {
+			boolean verify = false;
+			if (cryptoType == CryptoType.SM) {
+				SM3Digest sm3Digest = new SM3Digest();
+				byte[] messageHash = sm3Digest.hash(message.getBytes(StandardCharsets.UTF_8));
+				verify = SM2Sign.verify(messageHash, secp256k1SigBase64Deserialization(signValue, publicKey));
+			} else {
+				ECDSASign ecdsaSign = new ECDSASign();
+				Sign.SignatureData signatureData = secp256k1SigBase64Deserialization(signValue, null);
+				byte[] messageHash = Hash.sha3(message.getBytes(StandardCharsets.UTF_8));
+				verify = ecdsaSign.verify(messageHash, new BigInteger(publicKey), signatureData);
+			}
+			return verify;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DidException(ErrorMessage.VALIDATE_SIGN_ERROR.getCode(),
+					ErrorMessage.VALIDATE_SIGN_ERROR.getMessage());
 		}
-		return verify;
 	}
 
 	/**

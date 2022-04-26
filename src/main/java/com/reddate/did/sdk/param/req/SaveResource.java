@@ -8,9 +8,9 @@ import java.io.Serializable;
 public class SaveResource implements Serializable {
 
 	/**
-	 * did identifier
+	 * user id
 	 */
-	private String did;
+	private String uid;
 
 	/**
 	 * resource content
@@ -23,9 +23,9 @@ public class SaveResource implements Serializable {
 	private String url;
 
 	/**
-	 * resource owner did
+	 * resource owner user id
 	 */
-	private String ownerDid;
+	private String ownerUid;
 
 	/**
 	 * grant information
@@ -37,12 +37,12 @@ public class SaveResource implements Serializable {
 	 */
 	private String privateKey;
 
-	public String getDid() {
-		return did;
+	public String getUid() {
+		return uid;
 	}
 
-	public void setDid(String did) {
-		this.did = did;
+	public void setUid(String uid) {
+		this.uid = uid;
 	}
 
 	public String getContent() {
@@ -61,12 +61,12 @@ public class SaveResource implements Serializable {
 		this.url = url;
 	}
 
-	public String getOwnerDid() {
-		return ownerDid;
+	public String getOwnerUid() {
+		return ownerUid;
 	}
 
-	public void setOwnerDid(String ownerDid) {
-		this.ownerDid = ownerDid;
+	public void setOwnerUid(String ownerUid) {
+		this.ownerUid = ownerUid;
 	}
 
 	public Operation getGrant() {
@@ -84,5 +84,6 @@ public class SaveResource implements Serializable {
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
 	}
+
 
 }

@@ -1,5 +1,6 @@
 package com.reddate.did;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,14 +9,15 @@ import org.junit.Test;
 
 import com.alibaba.fastjson.JSONObject;
 import com.reddate.did.sdk.DidClient;
-import com.reddate.did.sdk.param.req.AuthIssuerList;
+import com.reddate.did.sdk.param.CryptoType;
+import com.reddate.did.sdk.param.req.AuthIssuer;
 import com.reddate.did.sdk.param.req.CheckPermission;
 import com.reddate.did.sdk.param.req.CreateCredential;
 import com.reddate.did.sdk.param.req.CreatePermission;
 import com.reddate.did.sdk.param.req.DeletePermission;
 import com.reddate.did.sdk.param.req.Operation;
-import com.reddate.did.sdk.param.req.QueryCptList;
-import com.reddate.did.sdk.param.req.QueryCredentialList;
+import com.reddate.did.sdk.param.req.QueryCpt;
+import com.reddate.did.sdk.param.req.QueryCredential;
 import com.reddate.did.sdk.param.req.QueryPermission;
 import com.reddate.did.sdk.param.req.RegisterAuthorityIssuer;
 import com.reddate.did.sdk.param.req.RegisterCpt;
@@ -23,6 +25,7 @@ import com.reddate.did.sdk.param.req.ResetDidAuth;
 import com.reddate.did.sdk.param.req.ResetDidAuthKey;
 import com.reddate.did.sdk.param.req.RevokeCredential;
 import com.reddate.did.sdk.param.req.SaveResource;
+import com.reddate.did.sdk.param.req.TransferOwner;
 import com.reddate.did.sdk.param.req.UsedFlag;
 import com.reddate.did.sdk.param.resp.DidDataWrapper;
 import com.reddate.did.sdk.param.resp.PermissionInfo;
@@ -44,6 +47,7 @@ import com.reddate.did.sdk.protocol.response.hub.CreatePermissionResp;
 import com.reddate.did.sdk.protocol.response.hub.DeletePermissionResp;
 import com.reddate.did.sdk.protocol.response.hub.QueryResourceResp;
 import com.reddate.did.sdk.util.ECDSAUtils;
+import com.reddate.did.sdk.util.Secp256Util;
 
 import static org.junit.Assert.*;
 
@@ -228,7 +232,7 @@ public class DidClientTest extends DidClientTestBase {
 		}
 
 		
-		AuthIssuerList queryIssuer = new AuthIssuerList();
+		AuthIssuer queryIssuer = new AuthIssuer();
 		queryIssuer.setPage(1);
 		queryIssuer.setSize(10);
 		queryIssuer.setDid(didDataWrapper.getDid());
@@ -256,7 +260,7 @@ public class DidClientTest extends DidClientTestBase {
 		}
 
 		
-		AuthIssuerList queryIssuer = new AuthIssuerList();
+		AuthIssuer queryIssuer = new AuthIssuer();
 		queryIssuer.setPage(1);
 		queryIssuer.setSize(10);
 		Pages<AuthorityIssuer> issuerList = didClient.queryAuthIssuerList(queryIssuer);
@@ -340,7 +344,7 @@ public class DidClientTest extends DidClientTestBase {
 		registerCpt.setCptJsonSchema(cptJsonSchemas);
 		CptBaseInfo cptBaseInfo = didClient.registerCpt(registerCpt);
 		
-		QueryCptList query = new QueryCptList();
+		QueryCpt query = new QueryCpt();
 		query.setDid(didDataWrapper.getDid());
 		query.setPage(1);
 		query.setSize(10);
@@ -708,7 +712,7 @@ public class DidClientTest extends DidClientTestBase {
         cred.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
         boolean revokeResult = didClient.revokeCredential(cred);
         
-        QueryCredentialList queryCredential = new QueryCredentialList();
+        QueryCredential queryCredential = new QueryCredential();
         queryCredential.setDid(didDataWrapper.getDid());
         queryCredential.setPage(1);
         queryCredential.setSize(10);
@@ -722,7 +726,20 @@ public class DidClientTest extends DidClientTestBase {
 	public void registerHubtTest() {
 		DidClient didClient = this.getDidClient();
 		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),CryptoType.ECDSA);
+		
+		System.out.println(JSONObject.toJSONString(registerHubResult));
+		
+		assertTrue(registerHubResult.isSuccess());
+	} 
+	
+	
+	@Test   
+	public void registerHubByPublicKeyTest() throws Exception {
+		KeyPair authKeyPair = ECDSAUtils.createKey();
+		
+		DidClient didClient = this.getDidClient();
+		RegisterHubResult registerHubResult = didClient.registerHub(authKeyPair.getPublicKey(),CryptoType.ECDSA);
 		
 		System.out.println(JSONObject.toJSONString(registerHubResult));
 		
@@ -730,17 +747,64 @@ public class DidClientTest extends DidClientTestBase {
 	} 
 	
 	@Test   
-	public void saveResourceTest() {
+	public void registerHubByIdAndPublicKeyTest() throws Exception {
+		DidClient didClient = this.getDidClient();
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult = didClient.registerHub(String.valueOf(System.currentTimeMillis()),keyPair.getPublicKey(),didClient.getHubCryptoType());
+		
+		System.out.println(JSONObject.toJSONString(registerHubResult));
+		
+		assertTrue(registerHubResult.isSuccess());
+	} 
+	
+	@Test   
+	public void registerHubByIdAndPublicKeyTest2() throws Exception {
+		DidClient didClient = this.getDidClient();
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		String userId = Secp256Util.getAddress(didClient.getHubCryptoType(), keyPair.getPrivateKey());
+
+		RegisterHubResult registerHubResult = didClient.registerHub(userId,keyPair.getPublicKey(),CryptoType.SM);
+		
+		System.out.println(JSONObject.toJSONString(registerHubResult));
+		
+		assertTrue(registerHubResult.isSuccess());
+	} 
+	
+	
+	@Test   
+	public void saveResourceECDSATest() {
 		DidClient didClient = this.getDidClient();
 		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
 		
 		SaveResource saveResource = new SaveResource();
-		saveResource.setDid(didDataWrapper.getDid());
+		saveResource.setUid(didDataWrapper.getDid());
 		saveResource.setContent("aaaaaaaaaaaaa");
 		saveResource.setGrant(Operation.WRITE);
-		saveResource.setOwnerDid(didDataWrapper.getDid());
+		saveResource.setOwnerUid(didDataWrapper.getDid());
 		saveResource.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
+		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
+		
+		System.out.println("=================="+JSONObject.toJSONString(saveResourceResult));
+				
+		assertNotNull(saveResourceResult.getEncryptKey());
+		assertNotNull(saveResourceResult.getUrl());
+	} 
+	
+	@Test   
+	public void saveResourceTest2() {
+		DidClient didClient = this.getDidClient();
+		
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(CryptoType.ECDSA);
+		String userId = Secp256Util.getAddress(CryptoType.ECDSA, keyPair.getPrivateKey());
+		RegisterHubResult registerHubResult = didClient.registerHub(userId,  keyPair.getPublicKey(),CryptoType.ECDSA);
+		
+		SaveResource saveResource = new SaveResource();
+		saveResource.setUid(userId);
+		saveResource.setContent("aaaaaaaaaaaaa");
+		saveResource.setGrant(Operation.WRITE);
+		saveResource.setOwnerUid(userId);
+		saveResource.setPrivateKey(keyPair.getPrivateKey());
 		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
 		
 		System.out.println("=================="+JSONObject.toJSONString(saveResourceResult));
@@ -750,31 +814,31 @@ public class DidClientTest extends DidClientTestBase {
 	} 
 	
 	@Test   
-	public void saveResourceTest2() {
+	public void saveResourceECDSATest3() {
 		DidClient didClient = this.getDidClient();
 		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
 		
 		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
-		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
 		
 		
 		CreatePermission createPermission = new CreatePermission();
-		createPermission.setDid(didDataWrapper.getDid());
+		createPermission.setUid(didDataWrapper.getDid());
 		createPermission.setUrl(null);
 		createPermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		createPermission.setGrant(Operation.WRITE);
-		createPermission.setGrantDid(didDataWrapper2.getDid());
+		createPermission.setGrantUid(didDataWrapper2.getDid());
 		createPermission.setGrantPublicKey(didDataWrapper2.getAuthKeyInfo().getPublicKey());
 		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
 		
 		SaveResource saveResource = new SaveResource();
-		saveResource.setDid(didDataWrapper2.getDid());
+		saveResource.setUid(didDataWrapper2.getDid());
 		saveResource.setPrivateKey(didDataWrapper2.getAuthKeyInfo().getPrivateKey());
 		saveResource.setUrl(createPermissionResp.getUrl());
 		saveResource.setContent("aaaaaaaaaaaaa1111");
 		saveResource.setGrant(Operation.WRITE);
-		saveResource.setOwnerDid(didDataWrapper.getDid());
+		saveResource.setOwnerUid(didDataWrapper.getDid());
 		
 		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
 		
@@ -785,16 +849,52 @@ public class DidClientTest extends DidClientTestBase {
 	
 	
 	@Test   
-	public void getResourceTest() {
+	public void saveResourceTest4() {
 		DidClient didClient = this.getDidClient();
-		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
+		
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(CryptoType.ECDSA);
+		String userId = Secp256Util.getAddress(CryptoType.ECDSA, keyPair.getPrivateKey());
+		RegisterHubResult registerHubResult = didClient.registerHub(userId,keyPair.getPublicKey(),CryptoType.ECDSA);
+		
+		com.reddate.did.sdk.param.KeyPair keyPair2 = Secp256Util.createKeyPair(CryptoType.ECDSA);
+		String userId2 = Secp256Util.getAddress(CryptoType.ECDSA, keyPair2.getPrivateKey());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(userId2, keyPair2.getPublicKey(),CryptoType.ECDSA);
+				
+		CreatePermission createPermission = new CreatePermission();
+		createPermission.setUid(registerHubResult.getUid());
+		createPermission.setUrl(null);
+		createPermission.setPrivateKey(keyPair.getPrivateKey());
+		createPermission.setGrant(Operation.WRITE);
+		createPermission.setGrantUid(registerHubResult2.getUid());
+		createPermission.setGrantPublicKey(keyPair2.getPublicKey());
+		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
 		
 		SaveResource saveResource = new SaveResource();
-		saveResource.setDid(didDataWrapper.getDid());
+		saveResource.setUid(registerHubResult2.getUid());
+		saveResource.setPrivateKey(keyPair2.getPrivateKey());
+		saveResource.setUrl(createPermissionResp.getUrl());
+		saveResource.setContent("aaaaaaaaaaaaa1111");
+		saveResource.setGrant(Operation.WRITE);
+		saveResource.setOwnerUid(registerHubResult.getUid());
+		
+		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
+		
+		System.out.println("=================="+JSONObject.toJSONString(saveResourceResult));
+		
+		assertNotNull(saveResourceResult.getUrl());
+	} 
+	
+	@Test   
+	public void getResourceECDSATest() {
+		DidClient didClient = this.getDidClient();
+		DidDataWrapper didDataWrapper = didClient.createDid(true);
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
+		
+		SaveResource saveResource = new SaveResource();
+		saveResource.setUid(didDataWrapper.getDid());
 		saveResource.setContent("aaaaaaaaaaaaa");
 		saveResource.setGrant(Operation.WRITE);
-		saveResource.setOwnerDid(didDataWrapper.getDid());
+		saveResource.setOwnerUid(didDataWrapper.getDid());
 		saveResource.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
 		
@@ -811,27 +911,52 @@ public class DidClientTest extends DidClientTestBase {
 	@Test   
 	public void getResourceTest2() {
 		DidClient didClient = this.getDidClient();
-		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
 		
-		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
-		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey());
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair.getPrivateKey()),  keyPair.getPublicKey(),didClient.getHubCryptoType());
 		
 		SaveResource saveResource = new SaveResource();
-		saveResource.setDid(didDataWrapper.getDid());
+		saveResource.setUid(registerHubResult.getUid());
 		saveResource.setContent("aaaaaaaaaaaaa");
 		saveResource.setGrant(Operation.WRITE);
-		saveResource.setOwnerDid(didDataWrapper.getDid());
+		saveResource.setOwnerUid(registerHubResult.getUid());
+		saveResource.setPrivateKey(keyPair.getPrivateKey());
+		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
+		
+		QueryResourceResp queryResourceResp = didClient.getResource(registerHubResult.getUid(), keyPair.getPrivateKey(), saveResourceResult.getUrl());
+		
+		
+		System.out.println("=================="+JSONObject.toJSONString(queryResourceResp));
+		
+		assertNotNull(queryResourceResp.getContent());
+		assertNotNull(queryResourceResp.getKey());
+	} 
+	
+	@Test   
+	public void getResourceECDSATest3() {
+		DidClient didClient = this.getDidClient();
+		DidDataWrapper didDataWrapper = didClient.createDid(true);
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
+		
+		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
+		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
+		
+		SaveResource saveResource = new SaveResource();
+		saveResource.setUid(didDataWrapper.getDid());
+		saveResource.setContent("aaaaaaaaaaaaa");
+		saveResource.setGrant(Operation.WRITE);
+		saveResource.setOwnerUid(didDataWrapper.getDid());
 		saveResource.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
 		System.out.println("=================="+JSONObject.toJSONString(saveResourceResult));
 		
 		CreatePermission createPermission = new CreatePermission();
-		createPermission.setDid(didDataWrapper.getDid());
+		createPermission.setUid(didDataWrapper.getDid());
 		createPermission.setUrl(saveResourceResult.getUrl());
 		createPermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		createPermission.setGrant(Operation.READ);
-		createPermission.setGrantDid(didDataWrapper2.getDid());
+		createPermission.setGrantUid(didDataWrapper2.getDid());
 		createPermission.setGrantPublicKey(didDataWrapper2.getAuthKeyInfo().getPublicKey());
 		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
 		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
@@ -843,18 +968,56 @@ public class DidClientTest extends DidClientTestBase {
 		assertNotNull(queryResourceResp.getKey());
 	} 
 	
-	
 	@Test   
-	public void deleteResourceTest() {
+	public void getResourceTest4() {
 		DidClient didClient = this.getDidClient();
-		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
+		
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair.getPrivateKey()), keyPair.getPublicKey(),didClient.getHubCryptoType());
+		
+		com.reddate.did.sdk.param.KeyPair keyPair2 = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair2.getPrivateKey()),  keyPair2.getPublicKey(),didClient.getHubCryptoType());
 		
 		SaveResource saveResource = new SaveResource();
-		saveResource.setDid(didDataWrapper.getDid());
+		saveResource.setUid(registerHubResult.getUid());
 		saveResource.setContent("aaaaaaaaaaaaa");
 		saveResource.setGrant(Operation.WRITE);
-		saveResource.setOwnerDid(didDataWrapper.getDid());
+		saveResource.setOwnerUid(registerHubResult.getUid());
+		saveResource.setPrivateKey(keyPair.getPrivateKey());
+		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
+		System.out.println("=================="+JSONObject.toJSONString(saveResourceResult));
+		
+		CreatePermission createPermission = new CreatePermission();
+		createPermission.setUid(registerHubResult.getUid());
+		createPermission.setUrl(saveResourceResult.getUrl());
+		createPermission.setPrivateKey(keyPair.getPrivateKey());
+		createPermission.setGrant(Operation.READ);
+		createPermission.setGrantUid(registerHubResult2.getUid());
+		createPermission.setGrantPublicKey(keyPair2.getPublicKey());
+		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
+		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
+	
+		QueryResourceResp queryResourceResp = didClient.getResource(registerHubResult2.getUid(), keyPair2.getPrivateKey(), createPermissionResp.getUrl());
+		System.out.println("=================="+JSONObject.toJSONString(queryResourceResp));
+		
+		assertNotNull(queryResourceResp.getContent());
+		assertNotNull(queryResourceResp.getKey());
+	}
+	
+	
+	@Test   
+	public void deleteResourceECDSATest() {
+		DidClient didClient = this.getDidClient();
+		DidDataWrapper didDataWrapper = didClient.createDid(true);
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
+		
+		SaveResource saveResource = new SaveResource();
+		saveResource.setUid(didDataWrapper.getDid());
+		saveResource.setContent("aaaaaaaaaaaaa");
+		saveResource.setGrant(Operation.WRITE);
+		saveResource.setOwnerUid(didDataWrapper.getDid());
 		saveResource.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
 		Boolean delete = didClient.deleteResource(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPrivateKey(), saveResourceResult.getUrl());
@@ -865,43 +1028,44 @@ public class DidClientTest extends DidClientTestBase {
 		assertTrue(delete);
 	} 
 	
-//	@Test   
-//	public void deleteResourceTest() {
-//		DidClient didClient = this.getDidClient();
-//		DidDataWrapper didDataWrapper = didClient.createDid(true);
-//		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
-//		
-//		SaveResource saveResource = new SaveResource();
-//		saveResource.setDid(didDataWrapper.getDid());
-//		saveResource.setContent("aaaaaaaaaaaaa");
-//		saveResource.setGrant(Operation.WRITE);
-//		saveResource.setOwnerDid(didDataWrapper.getDid());
-//		saveResource.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
-//		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
-//		
-//		Boolean delete = didClient.deleteResource(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPrivateKey(), saveResourceResult.getUrl());
-//		
-//		
-//		System.out.println("=================="+JSONObject.toJSONString(delete));
-//		
-//		assertTrue(delete);
-//	} 
-	
 	
 	@Test   
-	public void createPermissionTest() {
+	public void deleteResourceTest2() {
+		DidClient didClient = this.getDidClient();
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair.getPrivateKey()),  keyPair.getPublicKey(),didClient.getHubCryptoType());
+		
+		SaveResource saveResource = new SaveResource();
+		saveResource.setUid(registerHubResult.getUid());
+		saveResource.setContent("aaaaaaaaaaaaa");
+		saveResource.setGrant(Operation.WRITE);
+		saveResource.setOwnerUid(registerHubResult.getUid());
+		saveResource.setPrivateKey(keyPair.getPrivateKey());
+		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
+		Boolean delete = didClient.deleteResource(registerHubResult.getUid(), keyPair.getPrivateKey(), saveResourceResult.getUrl());
+		
+		
+		System.out.println("=================="+JSONObject.toJSONString(delete));
+		
+		assertTrue(delete);
+	} 
+	
+		
+	@Test   
+	public void createPermissionECDSATest() {
 		DidClient didClient = this.getDidClient();
 		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
 		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
-		
+		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
 		
 		CreatePermission createPermission = new CreatePermission();
-		createPermission.setDid(didDataWrapper.getDid());
+		createPermission.setUid(didDataWrapper.getDid());
 		createPermission.setUrl(null);
 		createPermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		createPermission.setGrant(Operation.WRITE);
-		createPermission.setGrantDid(didDataWrapper2.getDid());
+		createPermission.setGrantUid(didDataWrapper2.getDid());
 		createPermission.setGrantPublicKey(didDataWrapper2.getAuthKeyInfo().getPublicKey());
 		
 
@@ -918,28 +1082,58 @@ public class DidClientTest extends DidClientTestBase {
 	@Test   
 	public void createPermissionTest2() {
 		DidClient didClient = this.getDidClient();
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair.getPrivateKey()),  keyPair.getPublicKey(),didClient.getHubCryptoType());
+		
+		com.reddate.did.sdk.param.KeyPair keyPair2 = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair2.getPrivateKey()),  keyPair2.getPublicKey(),didClient.getHubCryptoType());
+		
+		
+		CreatePermission createPermission = new CreatePermission();
+		createPermission.setUid(registerHubResult.getUid());
+		createPermission.setUrl(null);
+		createPermission.setPrivateKey(keyPair.getPrivateKey());
+		createPermission.setGrant(Operation.WRITE);
+		createPermission.setGrantUid(registerHubResult2.getUid());
+		createPermission.setGrantPublicKey(keyPair2.getPublicKey());
+		
+
+		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
+		
+		
+		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
+		
+		assertNotNull(createPermissionResp.getUrl());
+		assertNotNull(createPermissionResp.getKey());
+	} 
+	
+	@Test   
+	public void createPermissionECDSATest3() {
+		DidClient didClient = this.getDidClient();
 		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
 		
 		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
-		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
 		
 		SaveResource saveResource = new SaveResource();
-		saveResource.setDid(didDataWrapper.getDid());
+		saveResource.setUid(didDataWrapper.getDid());
 		saveResource.setContent("aaaaaaaaaaaaa");
 		saveResource.setGrant(Operation.WRITE);
-		saveResource.setOwnerDid(didDataWrapper.getDid());
+		saveResource.setOwnerUid(didDataWrapper.getDid());
 		saveResource.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
 		
 		
 		
 		CreatePermission createPermission = new CreatePermission();
-		createPermission.setDid(didDataWrapper.getDid());
+		createPermission.setUid(didDataWrapper.getDid());
 		createPermission.setUrl(saveResourceResult.getUrl());
 		createPermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		createPermission.setGrant(Operation.READ);
-		createPermission.setGrantDid(didDataWrapper2.getDid());
+		createPermission.setGrantUid(didDataWrapper2.getDid());
 		createPermission.setGrantPublicKey(didDataWrapper2.getAuthKeyInfo().getPublicKey());
 		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
 		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
@@ -950,73 +1144,99 @@ public class DidClientTest extends DidClientTestBase {
 	
 	
 	@Test   
-	public void deletePermission() {
+	public void createPermissionTest4() {
+		DidClient didClient = this.getDidClient();
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair.getPrivateKey()),  keyPair.getPublicKey(),didClient.getHubCryptoType());
+		
+		com.reddate.did.sdk.param.KeyPair keyPair2 = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair2.getPrivateKey()),  keyPair2.getPublicKey(),didClient.getHubCryptoType());
+		
+		SaveResource saveResource = new SaveResource();
+		saveResource.setUid(registerHubResult.getUid());
+		saveResource.setContent("aaaaaaaaaaaaa");
+		saveResource.setGrant(Operation.WRITE);
+		saveResource.setOwnerUid(registerHubResult.getUid());
+		saveResource.setPrivateKey(keyPair.getPrivateKey());
+		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
+		
+		
+		
+		CreatePermission createPermission = new CreatePermission();
+		createPermission.setUid(registerHubResult.getUid());
+		createPermission.setUrl(saveResourceResult.getUrl());
+		createPermission.setPrivateKey(keyPair.getPrivateKey());
+		createPermission.setGrant(Operation.READ);
+		createPermission.setGrantUid(registerHubResult2.getUid());
+		createPermission.setGrantPublicKey(keyPair2.getPublicKey());
+		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
+		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
+		
+		assertNotNull(createPermissionResp.getUrl());
+		assertNotNull(createPermissionResp.getKey());
+	} 
+	
+	@Test   
+	public void deletePermissionECDSA() {
 		DidClient didClient = this.getDidClient();
 		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
 		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
 		
 		
 		CreatePermission createPermission = new CreatePermission();
-		createPermission.setDid(didDataWrapper.getDid());
+		createPermission.setUid(didDataWrapper.getDid());
 		createPermission.setUrl(null);
 		createPermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		createPermission.setGrant(Operation.WRITE);
-		createPermission.setGrantDid(didDataWrapper2.getDid());
+		createPermission.setGrantUid(didDataWrapper2.getDid());
 		createPermission.setGrantPublicKey(didDataWrapper2.getAuthKeyInfo().getPublicKey());
 		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
 		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
 		
 		DeletePermission deletePermission = new DeletePermission();
-		deletePermission.setDid(didDataWrapper.getDid());
+		deletePermission.setUid(didDataWrapper.getDid());
 		deletePermission.setUrl(createPermissionResp.getUrl());
 		deletePermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		deletePermission.setGrant(Operation.WRITE);
-		deletePermission.setGrantDid(didDataWrapper2.getDid());
+		deletePermission.setGrantUid(didDataWrapper2.getDid());
 		DeletePermissionResp deletePermissionResp = didClient.deletePermission(deletePermission);
 		
 		System.out.println("=================="+JSONObject.toJSONString(deletePermissionResp));
 		
 		assertTrue(deletePermissionResp.isSucces());
 	} 
-	
 	
 	@Test   
 	public void deletePermission2() {
 		DidClient didClient = this.getDidClient();
-		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair.getPrivateKey()),  keyPair.getPublicKey(),didClient.getHubCryptoType());
 		
-		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
-		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey());
-		
-		SaveResource saveResource = new SaveResource();
-		saveResource.setDid(didDataWrapper.getDid());
-		saveResource.setContent("aaaaaaaaaaaaa");
-		saveResource.setGrant(Operation.WRITE);
-		saveResource.setOwnerDid(didDataWrapper.getDid());
-		saveResource.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
-		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
-		
+		com.reddate.did.sdk.param.KeyPair keyPair2 = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair2.getPrivateKey()),  keyPair2.getPublicKey(),didClient.getHubCryptoType());
 		
 		
 		CreatePermission createPermission = new CreatePermission();
-		createPermission.setDid(didDataWrapper.getDid());
-		createPermission.setUrl(saveResourceResult.getUrl());
-		createPermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
-		createPermission.setGrant(Operation.READ);
-		createPermission.setGrantDid(didDataWrapper2.getDid());
-		createPermission.setGrantPublicKey(didDataWrapper2.getAuthKeyInfo().getPublicKey());
+		createPermission.setUid(registerHubResult.getUid());
+		createPermission.setUrl(null);
+		createPermission.setPrivateKey(keyPair.getPrivateKey());
+		createPermission.setGrant(Operation.WRITE);
+		createPermission.setGrantUid(registerHubResult2.getUid());
+		createPermission.setGrantPublicKey(keyPair2.getPublicKey());
 		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
 		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
 		
-		
 		DeletePermission deletePermission = new DeletePermission();
-		deletePermission.setDid(didDataWrapper.getDid());
+		deletePermission.setUid(registerHubResult.getUid());
 		deletePermission.setUrl(createPermissionResp.getUrl());
-		deletePermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
-		deletePermission.setGrant(Operation.READ);
-		deletePermission.setGrantDid(didDataWrapper2.getDid());
+		deletePermission.setPrivateKey(keyPair.getPrivateKey());
+		deletePermission.setGrant(Operation.WRITE);
+		deletePermission.setGrantUid(registerHubResult2.getUid());
 		DeletePermissionResp deletePermissionResp = didClient.deletePermission(deletePermission);
 		
 		System.out.println("=================="+JSONObject.toJSONString(deletePermissionResp));
@@ -1026,38 +1246,128 @@ public class DidClientTest extends DidClientTestBase {
 	
 	
 	@Test   
-	public void queryPermission() {
+	public void deletePermissionECDSA3() {
 		DidClient didClient = this.getDidClient();
 		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
 		
 		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
-		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
 		
 		SaveResource saveResource = new SaveResource();
-		saveResource.setDid(didDataWrapper.getDid());
+		saveResource.setUid(didDataWrapper.getDid());
 		saveResource.setContent("aaaaaaaaaaaaa");
 		saveResource.setGrant(Operation.WRITE);
-		saveResource.setOwnerDid(didDataWrapper.getDid());
+		saveResource.setOwnerUid(didDataWrapper.getDid());
 		saveResource.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
 		
 		
 		
 		CreatePermission createPermission = new CreatePermission();
-		createPermission.setDid(didDataWrapper.getDid());
+		createPermission.setUid(didDataWrapper.getDid());
 		createPermission.setUrl(saveResourceResult.getUrl());
 		createPermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		createPermission.setGrant(Operation.READ);
-		createPermission.setGrantDid(didDataWrapper2.getDid());
+		createPermission.setGrantUid(didDataWrapper2.getDid());
+		createPermission.setGrantPublicKey(didDataWrapper2.getAuthKeyInfo().getPublicKey());
+		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
+		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
+		
+		
+		DeletePermission deletePermission = new DeletePermission();
+		deletePermission.setUid(didDataWrapper.getDid());
+		deletePermission.setUrl(createPermissionResp.getUrl());
+		deletePermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
+		deletePermission.setGrant(Operation.READ);
+		deletePermission.setGrantUid(didDataWrapper2.getDid());
+		DeletePermissionResp deletePermissionResp = didClient.deletePermission(deletePermission);
+		
+		System.out.println("=================="+JSONObject.toJSONString(deletePermissionResp));
+		
+		assertTrue(deletePermissionResp.isSucces());
+	} 
+	
+	
+	@Test   
+	public void deletePermission4() {
+		DidClient didClient = this.getDidClient();
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair.getPrivateKey()),  keyPair.getPublicKey(),didClient.getHubCryptoType());
+		
+		com.reddate.did.sdk.param.KeyPair keyPair2 = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair2.getPrivateKey()),  keyPair2.getPublicKey(),didClient.getHubCryptoType());
+		
+		SaveResource saveResource = new SaveResource();
+		saveResource.setUid(registerHubResult.getUid());
+		saveResource.setContent("aaaaaaaaaaaaa");
+		saveResource.setGrant(Operation.WRITE);
+		saveResource.setOwnerUid(registerHubResult.getUid());
+		saveResource.setPrivateKey(keyPair.getPrivateKey());
+		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
+		
+		
+		
+		CreatePermission createPermission = new CreatePermission();
+		createPermission.setUid(registerHubResult.getUid());
+		createPermission.setUrl(saveResourceResult.getUrl());
+		createPermission.setPrivateKey(keyPair.getPrivateKey());
+		createPermission.setGrant(Operation.READ);
+		createPermission.setGrantUid(registerHubResult2.getUid());
+		createPermission.setGrantPublicKey(keyPair2.getPublicKey());
+		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
+		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
+		
+		
+		DeletePermission deletePermission = new DeletePermission();
+		deletePermission.setUid(registerHubResult.getUid());
+		deletePermission.setUrl(createPermissionResp.getUrl());
+		deletePermission.setPrivateKey(keyPair.getPrivateKey());
+		deletePermission.setGrant(Operation.READ);
+		deletePermission.setGrantUid(registerHubResult2.getUid());
+		DeletePermissionResp deletePermissionResp = didClient.deletePermission(deletePermission);
+		
+		System.out.println("=================="+JSONObject.toJSONString(deletePermissionResp));
+		
+		assertTrue(deletePermissionResp.isSucces());
+	} 
+	
+	
+	@Test   
+	public void queryPermissionECDSA() {
+		DidClient didClient = this.getDidClient();
+		DidDataWrapper didDataWrapper = didClient.createDid(true);
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
+		
+		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
+		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
+		
+		SaveResource saveResource = new SaveResource();
+		saveResource.setUid(didDataWrapper.getDid());
+		saveResource.setContent("aaaaaaaaaaaaa");
+		saveResource.setGrant(Operation.WRITE);
+		saveResource.setOwnerUid(didDataWrapper.getDid());
+		saveResource.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
+		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
+		
+		
+		
+		CreatePermission createPermission = new CreatePermission();
+		createPermission.setUid(didDataWrapper.getDid());
+		createPermission.setUrl(saveResourceResult.getUrl());
+		createPermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
+		createPermission.setGrant(Operation.READ);
+		createPermission.setGrantUid(didDataWrapper2.getDid());
 		createPermission.setGrantPublicKey(didDataWrapper2.getAuthKeyInfo().getPublicKey());
 		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
 		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
 		
 		QueryPermission queryPermission = new QueryPermission();
-		queryPermission.setDid(didDataWrapper.getDid());
+		queryPermission.setUid(didDataWrapper.getDid());
 
-		queryPermission.setGrantDid(didDataWrapper2.getDid());
+		queryPermission.setGrantUid(didDataWrapper2.getDid());
 		queryPermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		List<PermissionInfo> permissionList = didClient.queryPermission(queryPermission);
 		
@@ -1071,34 +1381,84 @@ public class DidClientTest extends DidClientTestBase {
 		assertTrue(permissionList2.size() > 0);
 	} 
 	
+	
 	@Test   
-	public void checkPermissionTest() {
+	public void queryPermission2() {
 		DidClient didClient = this.getDidClient();
-		DidDataWrapper didDataWrapper = didClient.createDid(true);
-		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey());
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair.getPrivateKey()),  keyPair.getPublicKey(),didClient.getHubCryptoType());
 		
-		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
-		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey());
+		com.reddate.did.sdk.param.KeyPair keyPair2 = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair2.getPrivateKey()),  keyPair2.getPublicKey(),didClient.getHubCryptoType());
+		
+		SaveResource saveResource = new SaveResource();
+		saveResource.setUid(registerHubResult.getUid());
+		saveResource.setContent("aaaaaaaaaaaaa");
+		saveResource.setGrant(Operation.WRITE);
+		saveResource.setOwnerUid(registerHubResult.getUid());
+		saveResource.setPrivateKey(keyPair.getPrivateKey());
+		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
+		
 		
 		
 		CreatePermission createPermission = new CreatePermission();
-		createPermission.setDid(didDataWrapper.getDid());
+		createPermission.setUid(registerHubResult.getUid());
+		createPermission.setUrl(saveResourceResult.getUrl());
+		createPermission.setPrivateKey(keyPair.getPrivateKey());
+		createPermission.setGrant(Operation.READ);
+		createPermission.setGrantUid(registerHubResult2.getUid());
+		createPermission.setGrantPublicKey(keyPair2.getPublicKey());
+		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
+		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
+		
+		QueryPermission queryPermission = new QueryPermission();
+		queryPermission.setUid(registerHubResult.getUid());
+
+		queryPermission.setGrantUid(registerHubResult2.getUid());
+		queryPermission.setPrivateKey(keyPair.getPrivateKey());
+		List<PermissionInfo> permissionList = didClient.queryPermission(queryPermission);
+		
+		System.out.println("=================="+JSONObject.toJSONString(permissionList));
+		
+		queryPermission.setFlag(UsedFlag.NO);
+		List<PermissionInfo> permissionList2 = didClient.queryPermission(queryPermission);
+		System.out.println("=================="+JSONObject.toJSONString(permissionList2));
+		
+		assertTrue(permissionList.size() > 0);
+		assertTrue(permissionList2.size() > 0);
+	} 
+	
+	
+	@Test   
+	public void checkPermissionECDSATest() {
+		DidClient didClient = this.getDidClient();
+		DidDataWrapper didDataWrapper = didClient.createDid(true);
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
+		
+		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
+		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
+		
+		
+		CreatePermission createPermission = new CreatePermission();
+		createPermission.setUid(didDataWrapper.getDid());
 		createPermission.setUrl(null);
 		createPermission.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
 		createPermission.setGrant(Operation.WRITE);
-		createPermission.setGrantDid(didDataWrapper2.getDid());
+		createPermission.setGrantUid(didDataWrapper2.getDid());
 		createPermission.setGrantPublicKey(didDataWrapper2.getAuthKeyInfo().getPublicKey());
 		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
 		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
 		
 		
 		CheckPermission checkPermission = new CheckPermission();
-		checkPermission.setDid(didDataWrapper2.getDid());
+		checkPermission.setUid(didDataWrapper2.getDid());
 		checkPermission.setPrivateKey(didDataWrapper2.getAuthKeyInfo().getPrivateKey());
 		checkPermission.setUrl(createPermissionResp.getUrl());
 		checkPermission.setGrant(Operation.WRITE);
-		checkPermission.setOwnerDid(didDataWrapper.getDid());
-		checkPermission.setGrantDid(didDataWrapper2.getDid());
+		checkPermission.setOwnerUid(didDataWrapper.getDid());
+		checkPermission.setGrantUid(didDataWrapper2.getDid());
 		
 		CheckPermissionResp checkPermissionResp = didClient.checkPermission(checkPermission);
 		System.out.println("=================="+JSONObject.toJSONString(checkPermissionResp));
@@ -1106,5 +1466,135 @@ public class DidClientTest extends DidClientTestBase {
 		assertTrue(checkPermissionResp.isSucces());
 		assertNotNull(checkPermissionResp.getKey());
 	} 
+	
+	@Test   
+	public void checkPermissionTest2() {
+		DidClient didClient = this.getDidClient();
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair.getPrivateKey()), keyPair.getPublicKey(),didClient.getHubCryptoType());
+		
+		com.reddate.did.sdk.param.KeyPair keyPair2 = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair2.getPrivateKey()), keyPair2.getPublicKey(),didClient.getHubCryptoType());
+		
+		
+		CreatePermission createPermission = new CreatePermission();
+		createPermission.setUid(registerHubResult.getUid());
+		createPermission.setUrl(null);
+		createPermission.setPrivateKey(keyPair.getPrivateKey());
+		createPermission.setGrant(Operation.WRITE);
+		createPermission.setGrantUid(registerHubResult2.getUid());
+		createPermission.setGrantPublicKey(keyPair2.getPublicKey());
+		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
+		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
+		
+		
+		CheckPermission checkPermission = new CheckPermission();
+		checkPermission.setUid(registerHubResult2.getUid());
+		checkPermission.setPrivateKey(keyPair2.getPrivateKey());
+		checkPermission.setUrl(createPermissionResp.getUrl());
+		checkPermission.setGrant(Operation.WRITE);
+		checkPermission.setOwnerUid(registerHubResult.getUid());
+		checkPermission.setGrantUid(registerHubResult2.getUid());
+		
+		CheckPermissionResp checkPermissionResp = didClient.checkPermission(checkPermission);
+		System.out.println("=================="+JSONObject.toJSONString(checkPermissionResp));
+		
+		assertTrue(checkPermissionResp.isSucces());
+		assertNotNull(checkPermissionResp.getKey());
+	} 
+	
+	@Test
+	public void generalKeyPairByMnemonic() {
+		List<String> mnemList = Arrays.asList("this is one test input mnemonic the size of mnemonic should 16".split(" "));
+		KeyPair keyPair = DidClient.generalKeyPairByMnemonic(mnemList);
+		System.out.println("=================="+JSONObject.toJSONString(keyPair));
+		assertNotNull(keyPair.getPrivateKey());
+		assertNotNull(keyPair.getPublicKey());
+		assertNotNull(keyPair.getType());
+	}
+	
+	
+	@Test   
+	public void transferOwnerTest() {
+		DidClient didClient = this.getDidClient();
+		DidDataWrapper didDataWrapper = didClient.createDid(true);
+		RegisterHubResult registerHubResult = didClient.registerHub(didDataWrapper.getDid(), didDataWrapper.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
+		DidDataWrapper didDataWrapper2 = didClient.createDid(true);
+		RegisterHubResult registerHubResult2 = didClient.registerHub(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPublicKey(),didClient.getHubCryptoType());
+		
+		SaveResource saveResource = new SaveResource();
+		saveResource.setUid(didDataWrapper.getDid());
+		saveResource.setContent("aaaaaaaaaaaaa");
+		saveResource.setGrant(Operation.WRITE);
+		saveResource.setOwnerUid(didDataWrapper.getDid());
+		saveResource.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
+		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
+		
+		TransferOwner transferOwner = new TransferOwner();
+		transferOwner.setUid(registerHubResult.getUid());
+		transferOwner.setUrl(saveResourceResult.getUrl());
+		transferOwner.setPrivateKey(didDataWrapper.getAuthKeyInfo().getPrivateKey());
+		transferOwner.setNewOwnerUid(registerHubResult2.getUid());
+		transferOwner.setNewOwnerPublicKey(didDataWrapper2.getAuthKeyInfo().getPublicKey());
+		Boolean transferResult = didClient.transferOwner(transferOwner);
+		System.out.println("=================="+transferResult);
+		
+		QueryResourceResp queryResourceResp = didClient.getResource(didDataWrapper2.getDid(), didDataWrapper2.getAuthKeyInfo().getPrivateKey(), saveResourceResult.getUrl());		
+		String content = didClient.decrypt(queryResourceResp.getContent(), queryResourceResp.getKey(), didDataWrapper2.getAuthKeyInfo().getPrivateKey());
+		System.out.println(content);
+		assertNotNull(content);
+	} 
+	
+	
+	@Test   
+	public void transferOwnerTest2() {
+		DidClient didClient = this.getDidClient();
+		
+		com.reddate.did.sdk.param.KeyPair keyPair = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair.getPrivateKey()),  keyPair.getPublicKey(),didClient.getHubCryptoType());
+		com.reddate.did.sdk.param.KeyPair keyPair2 = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult2 = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair2.getPrivateKey()),  keyPair2.getPublicKey(),didClient.getHubCryptoType());
+		com.reddate.did.sdk.param.KeyPair keyPair3 = Secp256Util.createKeyPair(didClient.getHubCryptoType());
+		RegisterHubResult registerHubResult3 = didClient.registerHub(Secp256Util.getAddress(didClient.getHubCryptoType(),
+				keyPair3.getPrivateKey()),  keyPair3.getPublicKey(),didClient.getHubCryptoType());
+		
+		SaveResource saveResource = new SaveResource();
+		saveResource.setUid(registerHubResult.getUid());
+		saveResource.setContent("aaaaaaaaaaaaa");
+		saveResource.setGrant(Operation.WRITE);
+		saveResource.setOwnerUid(registerHubResult.getUid());
+		saveResource.setPrivateKey(keyPair.getPrivateKey());
+		SaveResourceResult saveResourceResult = didClient.saveResource(saveResource);
+		
+		
+		CreatePermission createPermission = new CreatePermission();
+		createPermission.setUid(registerHubResult.getUid());
+		createPermission.setUrl(saveResourceResult.getUrl());
+		createPermission.setPrivateKey(keyPair.getPrivateKey());
+		createPermission.setGrant(Operation.READ);
+		createPermission.setGrantUid(registerHubResult3.getUid());
+		createPermission.setGrantPublicKey(keyPair3.getPublicKey());
+		CreatePermissionResp createPermissionResp = didClient.createPermission(createPermission);
+		System.out.println("=================="+JSONObject.toJSONString(createPermissionResp));
+		
+		TransferOwner transferOwner = new TransferOwner();
+		transferOwner.setUid(registerHubResult.getUid());
+		transferOwner.setUrl(saveResourceResult.getUrl());
+		transferOwner.setPrivateKey(keyPair.getPrivateKey());
+		transferOwner.setNewOwnerUid(registerHubResult2.getUid());
+		transferOwner.setNewOwnerPublicKey(keyPair2.getPublicKey());
+		Boolean transferResult = didClient.transferOwner(transferOwner);
+		System.out.println("=================="+transferResult);
+		
+		QueryResourceResp queryResourceResp = didClient.getResource(registerHubResult2.getUid(), keyPair2.getPrivateKey(), saveResourceResult.getUrl());
+		String content = didClient.decrypt(queryResourceResp.getContent(), queryResourceResp.getKey(), keyPair2.getPrivateKey());
+		System.out.println(content);
+		assertNotNull(content);
+	} 
+	
 	
 }

@@ -1,10 +1,15 @@
 package com.reddate.did.sdk.service;
 
+import java.math.BigInteger;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import cn.hutool.core.util.ObjectUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +18,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.reddate.did.sdk.constant.ErrorMessage;
 import com.reddate.did.sdk.constant.ServiceURL;
 import com.reddate.did.sdk.exception.DidException;
+import com.reddate.did.sdk.param.CryptoType;
+import com.reddate.did.sdk.param.req.DidSign;
 import com.reddate.did.sdk.param.req.ResetDidAuth;
 import com.reddate.did.sdk.param.resp.DidDataWrapper;
 import com.reddate.did.sdk.param.resp.DocumentInfo;
@@ -22,13 +29,17 @@ import com.reddate.did.sdk.protocol.common.KeyPair;
 import com.reddate.did.sdk.protocol.common.Proof;
 import com.reddate.did.sdk.protocol.request.DidDocSotreReq;
 import com.reddate.did.sdk.protocol.request.DidDocumentReq;
+import com.reddate.did.sdk.protocol.request.DidSignWrapper;
 import com.reddate.did.sdk.protocol.request.RequestParam;
 import com.reddate.did.sdk.protocol.request.ResetDidWrapper;
+import com.reddate.did.sdk.protocol.response.BlockInfoResp;
 import com.reddate.did.sdk.protocol.response.CreateDidData;
 import com.reddate.did.sdk.protocol.response.ResultData;
 import com.reddate.did.sdk.util.DidUtils;
 import com.reddate.did.sdk.util.ECDSAUtils;
 import com.reddate.did.sdk.util.HttpUtils;
+import com.reddate.did.sdk.util.MnemonicUtil;
+import com.reddate.did.sdk.util.Signatures;
 
 /**
  * The did module implement class,
@@ -40,8 +51,8 @@ public class DidService extends BaseService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DidService.class);
 
-	public DidService(String url, String projectId, String token) {
-		super(url, projectId, token);
+	public DidService(String url, String projectId, String token, CryptoType cryptoType) {
+		super(url, projectId, token, cryptoType);
 	}
 
 	/**
@@ -54,7 +65,7 @@ public class DidService extends BaseService {
 	 */
 	public ResultData<DidDataWrapper> generateDid(Boolean isStorageOnChain) {
 		if (isStorageOnChain == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "isStorageOnChain can not empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "isStorageOnChain is empty");
 		}
 		ResultData<CreateDidData> createDoc = createDidDocument();
 		if (!createDoc.isSuccess()) {
@@ -62,17 +73,17 @@ public class DidService extends BaseService {
 		}
 		logger.debug("create did information is :" + JSONObject.toJSONString(createDoc));
 
-		if (isStorageOnChain) {
-			ResultData<Boolean> sotreDoc = storeDidDocumentOnChain(createDoc.getData().getDidDocument());
-			if (!sotreDoc.isSuccess()) {
-				String msg = sotreDoc.getMsg();
-				if (msg == null || msg.trim().isEmpty()) {
-					msg = "document On-chain failed";
-				}
-				return ResultData.error(sotreDoc.getCode(), msg, DidDataWrapper.class);
-			}
-		}
+		String didSign = ECDSAUtils.sign(createDoc.getData().getDid(),
+				createDoc.getData().getAuthKeyInfo().getPrivateKey());
 
+		if (isStorageOnChain) {
+			storeDidDocumentOnChain(createDoc.getData().getDidDocument());
+		}
+		
+		ECKeyPair ecKeyPair = GenCredential.createECDSAKeyPair(new BigInteger(createDoc.getData().getAuthKeyInfo().getPublicKey()).toString(16));
+		Credentials credentials = GenCredential.create(ecKeyPair);
+		String address = credentials.getAddress();
+		
 		DidDataWrapper dataWrapper = new DidDataWrapper();
 		dataWrapper.setDid(createDoc.getData().getDid());
 		dataWrapper.setAuthKeyInfo(createDoc.getData().getAuthKeyInfo());
@@ -86,6 +97,8 @@ public class DidService extends BaseService {
 		documentInfo.setVersion(createDoc.getData().getDidDocument().getVersion());
 		documentInfo.setProof(createDoc.getData().getDidDocument().getProof());
 		dataWrapper.setDocument(documentInfo);
+		dataWrapper.setDidSign(didSign);
+		dataWrapper.setAddress(address);
 
 		return ResultData.success(dataWrapper);
 	}
@@ -125,10 +138,6 @@ public class DidService extends BaseService {
 			}
 
 			String signValue = ECDSAUtils.sign(JSONArray.toJSON(didDocument).toString(), authKeyPair.getPrivateKey());
-			if (StringUtils.isBlank(signValue)) {
-				throw new DidException(ErrorMessage.SIGN_DID_FAIL.getCode(), ErrorMessage.SIGN_DID_FAIL.getMessage());
-			}
-
 			Proof proof = new Proof();
 			proof.setType(ECDSAUtils.TYPE);
 			proof.setCreator(did);
@@ -144,12 +153,10 @@ public class DidService extends BaseService {
 		} catch (DidException e) {
 			throw e;
 		} catch (TimeoutException e) {
-			e.printStackTrace();
 			logger.error(e.getMessage(), e);
 			return ResultData.error(ErrorMessage.GENERATE_DID_FAIL.getCode(),
 					ErrorMessage.GENERATE_DID_FAIL.getMessage(), CreateDidData.class);
 		} catch (Exception e) {
-			e.printStackTrace();
 			logger.error(e.getMessage(), e);
 			return ResultData.error(ErrorMessage.GENERATE_DID_FAIL.getCode(),
 					ErrorMessage.GENERATE_DID_FAIL.getMessage(), CreateDidData.class);
@@ -166,60 +173,56 @@ public class DidService extends BaseService {
 		if (ObjectUtil.isEmpty(document)) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "document is empty");
 		}
-		if (StringUtils.isEmpty(document.getDid())) {
+		if (StringUtils.isBlank(document.getDid())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is empty");
 		}
-		if (StringUtils.isEmpty(document.getCreated())) {
+		if (StringUtils.isBlank(document.getCreated())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "created is empty");
 		}
-		if (StringUtils.isEmpty(document.getUpdated())) {
+		if (StringUtils.isBlank(document.getUpdated())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "updated is empty");
 		}
-		if (StringUtils.isEmpty(document.getVersion())) {
+		if (StringUtils.isBlank(document.getVersion())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "version is empty");
 		}
 		if (ObjectUtil.isEmpty(document.getRecovery())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recovery is empty");
 		}
-		if (StringUtils.isEmpty(document.getRecovery().getPublicKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recovery publicKey is empty");
+		if (StringUtils.isBlank(document.getRecovery().getPublicKey())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recovery.publicKey is empty");
 		}
-		if (StringUtils.isEmpty(document.getRecovery().getType())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recovery type is empty");
+		if (StringUtils.isBlank(document.getRecovery().getType())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recovery.type is empty");
 		}
 		if (ObjectUtil.isEmpty(document.getAuthentication())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "authentication is empty");
 		}
-		if (StringUtils.isEmpty(document.getAuthentication().getPublicKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "authentication publicKey is empty");
+		if (StringUtils.isBlank(document.getAuthentication().getPublicKey())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "authentication.publicKey is empty");
 		}
-		if (StringUtils.isEmpty(document.getAuthentication().getType())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "authentication type is empty");
+		if (StringUtils.isBlank(document.getAuthentication().getType())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "authentication.type is empty");
 		}
 		if (ObjectUtil.isEmpty(document.getProof())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof is empty");
 		}
-		if (StringUtils.isEmpty(document.getProof().getType())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof type is empty");
+		if (StringUtils.isBlank(document.getProof().getType())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof.type is empty");
 		}
-		if (StringUtils.isEmpty(document.getProof().getCreator())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof creator is empty");
+		if (StringUtils.isBlank(document.getProof().getCreator())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof.creator is empty");
 		}
-		if (StringUtils.isEmpty(document.getProof().getSignatureValue())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof signatureValue is empty");
+		if (StringUtils.isBlank(document.getProof().getSignatureValue())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof.signatureValue is empty");
 		}
 		RequestParam<DidDocSotreReq> reqParam = new RequestParam<>(this.getProjectId(), document.getDid());
 		DidDocSotreReq didDocSotreReq = new DidDocSotreReq();
 		didDocSotreReq.setDidDoc(document);
 		reqParam.setData(didDocSotreReq);
 
-		ResultData<Boolean> regResult = HttpUtils.postCall(this.getUrl() + ServiceURL.PUT_DID_ON_CHAIN, this.getToken(),
-				reqParam, Boolean.class);
-		if (regResult.isSuccess()) {
-			return ResultData.success(null);
-		} else {
-			return ResultData.error(regResult.getCode(), regResult.getMsg(), Boolean.class);
-		}
+		HttpUtils.postCall(this.getUrl() + ServiceURL.PUT_DID_ON_CHAIN, this.getToken(), reqParam, Boolean.class);
+
+		return ResultData.success(null);
 	}
 
 	/**
@@ -231,49 +234,49 @@ public class DidService extends BaseService {
 	public ResultData<Boolean> verifyDidDocument(DidDocument didDocument) {
 
 		if (ObjectUtil.isEmpty(didDocument)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "document is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "didDocument is empty");
 		}
-		if (StringUtils.isEmpty(didDocument.getDid())) {
+		if (StringUtils.isBlank(didDocument.getDid())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is empty");
 		}
-		if (StringUtils.isEmpty(didDocument.getCreated())) {
+		if (StringUtils.isBlank(didDocument.getCreated())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "created is empty");
 		}
-		if (StringUtils.isEmpty(didDocument.getUpdated())) {
+		if (StringUtils.isBlank(didDocument.getUpdated())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "updated is empty");
 		}
-		if (StringUtils.isEmpty(didDocument.getVersion())) {
+		if (StringUtils.isBlank(didDocument.getVersion())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "version is empty");
 		}
 		if (ObjectUtil.isEmpty(didDocument.getRecovery())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recovery is empty");
 		}
-		if (StringUtils.isEmpty(didDocument.getRecovery().getPublicKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recovery publicKey is empty");
+		if (StringUtils.isBlank(didDocument.getRecovery().getPublicKey())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recovery.publicKey is empty");
 		}
-		if (StringUtils.isEmpty(didDocument.getRecovery().getType())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recovery type is empty");
+		if (StringUtils.isBlank(didDocument.getRecovery().getType())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recovery.type is empty");
 		}
 		if (ObjectUtil.isEmpty(didDocument.getAuthentication())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "authentication is empty");
 		}
-		if (StringUtils.isEmpty(didDocument.getAuthentication().getPublicKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "authentication publicKey is empty");
+		if (StringUtils.isBlank(didDocument.getAuthentication().getPublicKey())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "authentication.publicKey is empty");
 		}
-		if (StringUtils.isEmpty(didDocument.getAuthentication().getType())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "authentication type is empty");
+		if (StringUtils.isBlank(didDocument.getAuthentication().getType())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "authentication.type is empty");
 		}
 		if (ObjectUtil.isEmpty(didDocument.getProof())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof is empty");
 		}
-		if (StringUtils.isEmpty(didDocument.getProof().getType())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof type is empty");
+		if (StringUtils.isBlank(didDocument.getProof().getType())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof.type is empty");
 		}
-		if (StringUtils.isEmpty(didDocument.getProof().getCreator())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof creator is empty");
+		if (StringUtils.isBlank(didDocument.getProof().getCreator())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof.creator is empty");
 		}
-		if (StringUtils.isEmpty(didDocument.getProof().getSignatureValue())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof signatureValue is empty");
+		if (StringUtils.isBlank(didDocument.getProof().getSignatureValue())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof.signatureValue is empty");
 		}
 		RequestParam<DidDocSotreReq> reqParam = new RequestParam<>(this.getProjectId(), didDocument.getDid());
 		DidDocSotreReq didDocSotreReq = new DidDocSotreReq();
@@ -282,11 +285,8 @@ public class DidService extends BaseService {
 
 		ResultData<Boolean> regResult = HttpUtils.postCall(this.getUrl() + ServiceURL.VERIFY_DID_DOCUMENT,
 				this.getToken(), reqParam, Boolean.class);
-		if (regResult.isSuccess()) {
-			return ResultData.success(regResult.getData());
-		} else {
-			return ResultData.error(regResult.getCode(), regResult.getMsg(), Boolean.class);
-		}
+
+		return ResultData.success(regResult.getData());
 	}
 
 	/**
@@ -298,7 +298,7 @@ public class DidService extends BaseService {
 	 * @return The did document detail information
 	 */
 	public ResultData<DidDocument> getDidDocument(String did) {
-		if (StringUtils.isEmpty(did)) {
+		if (StringUtils.isBlank(did)) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is empty");
 		}
 		RequestParam<DidDocumentReq> reqParam = new RequestParam<>(this.getProjectId(), did);
@@ -308,11 +308,7 @@ public class DidService extends BaseService {
 		ResultData<DidDocument> regResult = HttpUtils.postCall(this.getUrl() + ServiceURL.GET_DID_DOCUMENT,
 				this.getToken(), reqParam, DidDocument.class);
 
-		if (regResult.isSuccess()) {
-			return ResultData.success(regResult.getData());
-		} else {
-			return ResultData.error(regResult.getCode(), regResult.getMsg(), DidDocument.class);
-		}
+		return ResultData.success(regResult.getData());
 	}
 
 	/**
@@ -325,44 +321,30 @@ public class DidService extends BaseService {
 	 */
 	public ResultData<KeyPair> resetDidAuth(ResetDidAuth resetDidAuth) throws Exception {
 		if (ObjectUtil.isEmpty(resetDidAuth)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "reset did auth is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "resetDidAuth is empty");
 		}
-		if (StringUtils.isEmpty(resetDidAuth.getDid())) {
+		if (StringUtils.isBlank(resetDidAuth.getDid())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is empty");
 		}
 
 		if (ObjectUtil.isEmpty(resetDidAuth.getRecoveryKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recovery key is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recoveryKey is empty");
 		}
 		if (ObjectUtil.isEmpty(resetDidAuth.getRecoveryKey().getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "private key is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recoveryKey。privateKey is empty");
 		}
 		if (ObjectUtil.isEmpty(resetDidAuth.getRecoveryKey().getType())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "type key is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recoveryKey。type is empty");
 		}
 		if (ObjectUtil.isEmpty(resetDidAuth.getRecoveryKey().getPublicKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "public key is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "recoveryKey。publicKey is empty");
 		}
-		ResultData<DidDocument> queryDidDocument = null;
-		try {
-			queryDidDocument = this.getDidDocument(resetDidAuth.getDid());
-		} catch (DidException e1) {
-			throw new DidException(e1.getCode(), e1.getMessage());
-		} catch (Exception e1) {
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(),
-					"query did document on chian failed: " + e1.getMessage());
-		}
+		ResultData<DidDocument> queryDidDocument = this.getDidDocument(resetDidAuth.getDid());
 		if (!queryDidDocument.isSuccess()) {
 			throw new DidException(queryDidDocument.getCode(), queryDidDocument.getMsg());
 		}
 
-		String recoveryPublicKey = null;
-		try {
-			recoveryPublicKey = ECDSAUtils.getPublicKey(resetDidAuth.getRecoveryKey().getPrivateKey());
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-
+		String recoveryPublicKey = ECDSAUtils.getPublicKey(resetDidAuth.getRecoveryKey().getPrivateKey());
 		if (recoveryPublicKey == null
 				|| !recoveryPublicKey.equals(queryDidDocument.getData().getRecovery().getPublicKey())) {
 			throw new DidException(ErrorMessage.RECOVERY_KEY_INCORRECT.getCode(),
@@ -379,12 +361,7 @@ public class DidService extends BaseService {
 				|| resetDidAuth.getPrimaryKeyPair().getType().trim().isEmpty()) {
 			keyPair = ECDSAUtils.createKey();
 		} else {
-			String publicKey = null;
-			try {
-				publicKey = ECDSAUtils.getPublicKey(resetDidAuth.getPrimaryKeyPair().getPrivateKey());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			String publicKey = ECDSAUtils.getPublicKey(resetDidAuth.getPrimaryKeyPair().getPrivateKey());
 			if (publicKey == null || !publicKey.equals(resetDidAuth.getPrimaryKeyPair().getPublicKey())) {
 				throw new DidException(ErrorMessage.PRK_PUK_NOT_MATCH.getCode(),
 						ErrorMessage.PRK_PUK_NOT_MATCH.getMessage());
@@ -393,26 +370,14 @@ public class DidService extends BaseService {
 
 		DidDocument newDidDocument = DidUtils.renewDidDocument(didDoc, keyPair);
 		String signValue = ECDSAUtils.sign(JSONArray.toJSON(newDidDocument).toString(), keyPair.getPrivateKey());
-		if (StringUtils.isBlank(signValue)) {
-			throw new DidException(ErrorMessage.SIGNATURE_FAILED.getCode(), ErrorMessage.SIGNATURE_FAILED.getMessage());
-		}
-
-		// Assembling sign
 		Proof proof = new Proof();
 		proof.setType(ECDSAUtils.TYPE);
 		proof.setCreator(newDidDocument.getDid());
 		proof.setSignatureValue(signValue);
 		newDidDocument.setProof(proof);
+		String authPublicKeySign = ECDSAUtils.sign(recoveryPublicKey, resetDidAuth.getRecoveryKey().getPrivateKey());
 
-		String authPublicKeySign = null;
-		try {
-			authPublicKeySign = ECDSAUtils.sign(recoveryPublicKey, resetDidAuth.getRecoveryKey().getPrivateKey());
-		} catch (Exception e1) {
-			e1.printStackTrace();
-			throw new DidException(ErrorMessage.SIGNATURE_FAILED.getCode(), ErrorMessage.SIGNATURE_FAILED.getMessage());
-		}
-
-		String signature = com.reddate.did.sdk.util.Signatures.get().setInfo(this.getProjectId(), didDoc.getDid())
+		String signature = Signatures.get().setInfo(this.getProjectId(), didDoc.getDid())
 				.add("document", newDidDocument).add("authPubKeySign", authPublicKeySign)
 				.sign(resetDidAuth.getRecoveryKey().getPrivateKey());
 
@@ -423,13 +388,73 @@ public class DidService extends BaseService {
 		reqParam.setData(resetDidWrapper);
 		reqParam.setSign(signature);
 
-		ResultData<KeyPair> restAuthResult = HttpUtils.postCall(this.getUrl() + ServiceURL.REST_DID_AUTH,
-				this.getToken(), reqParam, KeyPair.class);
-		if (restAuthResult.isSuccess()) {
-			return ResultData.success(keyPair);
-		} else {
-			return ResultData.error(restAuthResult.getCode(), restAuthResult.getMsg(), KeyPair.class);
-		}
+		HttpUtils.postCall(this.getUrl() + ServiceURL.REST_DID_AUTH, this.getToken(), reqParam, KeyPair.class);
+
+		return ResultData.success(keyPair);
 	}
 
+	public static KeyPair generalKeyPairByMnemonic(List<String> mnemList) {
+//		if (mnemList == null || mnemList.size() != 12) {
+//			throw new DidException(ErrorMessage.MNEM_NUMBER_INCORRECT.getCode(),
+//					ErrorMessage.MNEM_NUMBER_INCORRECT.getMessage());
+//		}
+
+		if(mnemList == null || mnemList.isEmpty()) {
+			throw new DidException(ErrorMessage.MNEM_IS_EMPTY.getCode(), ErrorMessage.MNEM_IS_EMPTY.getMessage());
+		}
+		
+		for (int i = 0; i < mnemList.size(); i++) {
+			String mnem = mnemList.get(i);
+			if (mnem == null || mnem.trim().isEmpty()) {
+				throw new DidException(ErrorMessage.MNEM_IS_EMPTY.getCode(), ErrorMessage.MNEM_IS_EMPTY.getMessage());
+			}
+			mnemList.set(i, mnem.trim());
+		}
+
+		KeyPair keyPair = MnemonicUtil.generalKeyPair(mnemList);
+		return keyPair;
+	}
+
+	/**
+	 * Query current block number and group id
+	 * 
+	 * @return return current block number and group id
+	 */
+	public BlockInfoResp getBlockInfo() {
+		RequestParam<Object> reqParam = new RequestParam<>(this.getProjectId(), null);
+		ResultData<BlockInfoResp> regResult = HttpUtils.postCall(this.getUrl() + ServiceURL.GET_BLOCK_INFO,
+				this.getToken(), reqParam, BlockInfoResp.class);
+
+		return regResult.getData();
+	}
+
+	/**
+	 * 
+	 * Verify the sign value of the did identify is correct or not  by the did identify related document's public key.
+	 * 
+	 *
+	 * @param didSign the did identify and did identify's sign value
+	 * @return Return the verify did identify result
+	 */
+	public ResultData<Boolean> verifyDIdSign(DidSign didSign) {
+		if (didSign == null){
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(),"did and did sign is empty");
+		}
+		if (didSign.getDid() == null || didSign.getDid().trim().isEmpty()){
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(),"did is empty");
+		}
+		
+		if (didSign.getDidSign() == null || didSign.getDidSign().trim().isEmpty()){
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(),"did sign is empty");
+		}
+		
+		RequestParam<DidSignWrapper> reqParam = new RequestParam<>(this.getProjectId(),didSign.getDid());
+		DidSignWrapper didSignWrapper = new DidSignWrapper();
+		didSignWrapper.setDid(didSign.getDid());
+		didSignWrapper.setDidSign(didSign.getDidSign());
+		reqParam.setData(didSignWrapper);
+		
+		ResultData<Boolean> verifyResult = HttpUtils.postCall(this.getUrl()+ServiceURL.VERIFY_DID_SIGN,this.getToken(),reqParam, Boolean.class);
+		return verifyResult;
+	}
 }

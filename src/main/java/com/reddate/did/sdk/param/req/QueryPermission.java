@@ -10,12 +10,12 @@ public class QueryPermission implements Serializable{
 	/**
 	 * did identifier
 	 */
-	private String did;
+	private String uid;
 
 	/**
 	 * grant user did
 	 */
-	private String grantDid;
+	private String grantUid;
 	
 	/**
 	 * used flag
@@ -27,20 +27,20 @@ public class QueryPermission implements Serializable{
 	 */
 	private String privateKey;
 
-	public String getDid() {
-		return did;
+	public String getUid() {
+		return uid;
 	}
 
-	public void setDid(String did) {
-		this.did = did;
+	public void setUid(String uid) {
+		this.uid = uid;
 	}
 
-	public String getGrantDid() {
-		return grantDid;
+	public String getGrantUid() {
+		return grantUid;
 	}
 
-	public void setGrantDid(String grantDid) {
-		this.grantDid = grantDid;
+	public void setGrantUid(String grantUid) {
+		this.grantUid = grantUid;
 	}
 
 	public UsedFlag getFlag() {
@@ -58,8 +58,5 @@ public class QueryPermission implements Serializable{
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
 	}
-
-	
-	
 	
 }

@@ -15,7 +15,7 @@ public class RegisterHubResult implements Serializable {
 	/**
 	 * register user id
 	 */
-	private String did;
+	private String uid;
 
 	/**
 	 * error message when register failed
@@ -30,12 +30,12 @@ public class RegisterHubResult implements Serializable {
 		this.success = success;
 	}
 
-	public String getDid() {
-		return did;
+	public String getUid() {
+		return uid;
 	}
 
-	public void setDid(String did) {
-		this.did = did;
+	public void setUid(String uid) {
+		this.uid = uid;
 	}
 
 	public String getMessage() {

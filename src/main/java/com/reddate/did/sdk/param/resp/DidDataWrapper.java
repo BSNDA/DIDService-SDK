@@ -15,6 +15,12 @@ public class DidDataWrapper implements Serializable {
 	private String did;
 	
 	/**
+	 * Did Identifier sign
+	 * 
+	 */
+	private String didSign;
+	
+	/**
 	 * Main authenticate key pair
 	 */
 	private KeyPair authKeyInfo;
@@ -28,6 +34,11 @@ public class DidDataWrapper implements Serializable {
 	 * Did document defined
 	 */
 	private DocumentInfo document;
+	
+	/**
+	 * The address of public key
+	 */
+	private String address;
 	
 	public String getDid() {
 		return did;
@@ -59,6 +70,22 @@ public class DidDataWrapper implements Serializable {
 
 	public void setDocument(DocumentInfo document) {
 		this.document = document;
+	}
+
+	public String getDidSign() {
+		return didSign;
+	}
+
+	public void setDidSign(String didSign) {
+		this.didSign = didSign;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 }

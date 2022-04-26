@@ -55,7 +55,7 @@ public class AesUtils {
 		cipher.init(Cipher.DECRYPT_MODE, skeySpec);
 		byte[] encrypted1 = hex2byte(src);
 		byte[] original = cipher.doFinal(encrypted1);
-		String originalString = new String(original);
+		String originalString = new String(original,StandardCharsets.UTF_8);
 		return originalString;
 	}
 

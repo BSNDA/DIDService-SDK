@@ -3,9 +3,9 @@ package com.reddate.did.sdk.param.req;
 import java.io.Serializable;
 
 /**
- * Query credential list request data structure
+ * Query CPT template list request data structure
  */
-public class QueryCredentialList implements Serializable {
+public class QueryCpt implements Serializable {
 
 	/**
 	 * current page number
@@ -45,5 +45,4 @@ public class QueryCredentialList implements Serializable {
 	public void setDid(String did) {
 		this.did = did;
 	}
-
 }
