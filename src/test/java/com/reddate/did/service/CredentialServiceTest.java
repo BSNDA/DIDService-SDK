@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import org.junit.Test;
 
+import com.reddate.did.sdk.param.CryptoType;
 import com.reddate.did.sdk.protocol.common.PublicKey;
 import com.reddate.did.sdk.protocol.request.CredentialWrapper;
 import com.reddate.did.sdk.protocol.request.VerifyCredentialWrapper;
@@ -16,7 +17,7 @@ public class CredentialServiceTest {
     @Test
     public void testConstructor() {
         CredentialService actualCredentialService = new CredentialService("https://example.org/example", "ABC123",
-                "myproject");
+                "myproject",CryptoType.ECDSA);
 
         assertEquals("myproject", actualCredentialService.getProjectId());
         assertEquals("https://example.org/example", actualCredentialService.getUrl());
@@ -25,7 +26,7 @@ public class CredentialServiceTest {
 
     @Test
     public void testCreateCredential() {
-        CredentialService credentialService = new CredentialService("https://example.org/example", "ABC123", "myproject");
+        CredentialService credentialService = new CredentialService("https://example.org/example", "ABC123", "myproject",CryptoType.ECDSA);
 
         CredentialWrapper credentialWrapper = new CredentialWrapper();
         credentialWrapper.setExpirationDate("2020-03-01");
@@ -45,7 +46,7 @@ public class CredentialServiceTest {
 
     @Test
     public void testCreateCredential2() {
-        CredentialService credentialService = new CredentialService("UUU/UUU", "ABC123", "myproject");
+        CredentialService credentialService = new CredentialService("UUU/UUU", "ABC123", "myproject",CryptoType.ECDSA);
 
         CredentialWrapper credentialWrapper = new CredentialWrapper();
         credentialWrapper.setExpirationDate("2020-03-01");
@@ -65,7 +66,7 @@ public class CredentialServiceTest {
 
     @Test
     public void testCreateCredential3() {
-        CredentialService credentialService = new CredentialService("https://example.org/example", "UUU/UUU", "myproject");
+        CredentialService credentialService = new CredentialService("https://example.org/example", "UUU/UUU", "myproject",CryptoType.ECDSA);
 
         CredentialWrapper credentialWrapper = new CredentialWrapper();
         credentialWrapper.setExpirationDate("2020-03-01");
@@ -85,7 +86,7 @@ public class CredentialServiceTest {
 
     @Test
     public void testVerifyCredential() {
-        CredentialService credentialService = new CredentialService("https://example.org/example", "ABC123", "myproject");
+        CredentialService credentialService = new CredentialService("https://example.org/example", "ABC123", "myproject",CryptoType.ECDSA);
 
         PublicKey publicKey = new PublicKey();
         publicKey.setPublicKey("Public Key");
@@ -113,7 +114,7 @@ public class CredentialServiceTest {
 
     @Test
     public void testVerifyCredential2() {
-        CredentialService credentialService = new CredentialService("\"", "ABC123", "myproject");
+		CredentialService credentialService = new CredentialService("\"", "ABC123", "myproject", CryptoType.ECDSA);
 
         PublicKey publicKey = new PublicKey();
         publicKey.setPublicKey("Public Key");

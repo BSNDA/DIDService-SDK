@@ -8,14 +8,14 @@ import java.io.Serializable;
 public class QueryGrantedPermission implements Serializable{
 
 	/**
-	 * did identifier
+	 * user id
 	 */
-	private String did;
+	private String uid;
 
 	/**
 	 * resource owner user did
 	 */
-	private String ownerDid;
+	private String ownerUid;
 	
 	/**
 	 * grant permission
@@ -32,20 +32,28 @@ public class QueryGrantedPermission implements Serializable{
 	 */
 	private String privateKey;
 
-	public String getDid() {
-		return did;
+	public String getUid() {
+		return uid;
 	}
 
-	public void setDid(String did) {
-		this.did = did;
-	}
-	
-	public String getOwnerDid() {
-		return ownerDid;
+	public void setUid(String uid) {
+		this.uid = uid;
 	}
 
-	public void setOwnerDid(String ownerDid) {
-		this.ownerDid = ownerDid;
+	public String getOwnerUid() {
+		return ownerUid;
+	}
+
+	public void setOwnerUid(String ownerUid) {
+		this.ownerUid = ownerUid;
+	}
+
+	public Operation getGrant() {
+		return grant;
+	}
+
+	public void setGrant(Operation grant) {
+		this.grant = grant;
 	}
 
 	public UsedFlag getFlag() {
@@ -62,14 +70,6 @@ public class QueryGrantedPermission implements Serializable{
 
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
-	}
-
-	public Operation getGrant() {
-		return grant;
-	}
-
-	public void setGrant(Operation grant) {
-		this.grant = grant;
 	}
 
 }

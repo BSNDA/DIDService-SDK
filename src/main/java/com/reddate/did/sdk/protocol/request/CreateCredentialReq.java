@@ -38,6 +38,16 @@ public class CreateCredentialReq implements Serializable {
 	 * Voucher type: Proof
 	 */
 	private String type;
+	
+	/**
+	 * Brief description of the voucher
+	 */
+	private String shortDesc;
+
+	/**
+	 * Detailed description of the voucher
+	 */
+	private String longDesc;
 
 	public Long getCptId() {
 		return cptId;
@@ -85,6 +95,22 @@ public class CreateCredentialReq implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getShortDesc() {
+		return shortDesc;
+	}
+
+	public void setShortDesc(String shortDesc) {
+		this.shortDesc = shortDesc;
+	}
+
+	public String getLongDesc() {
+		return longDesc;
+	}
+
+	public void setLongDesc(String longDesc) {
+		this.longDesc = longDesc;
 	}
 
 }

@@ -5,13 +5,14 @@ import java.util.List;
 import com.reddate.did.sdk.constant.ErrorMessage;
 import com.reddate.did.sdk.exception.DidException;
 import com.reddate.did.sdk.param.CryptoType;
-import com.reddate.did.sdk.param.req.AuthIssuerList;
+import com.reddate.did.sdk.param.req.AuthIssuer;
 import com.reddate.did.sdk.param.req.CheckPermission;
 import com.reddate.did.sdk.param.req.CreateCredential;
 import com.reddate.did.sdk.param.req.CreatePermission;
 import com.reddate.did.sdk.param.req.DeletePermission;
-import com.reddate.did.sdk.param.req.QueryCptList;
-import com.reddate.did.sdk.param.req.QueryCredentialList;
+import com.reddate.did.sdk.param.req.DidSign;
+import com.reddate.did.sdk.param.req.QueryCpt;
+import com.reddate.did.sdk.param.req.QueryCredential;
 import com.reddate.did.sdk.param.req.QueryGrantedPermission;
 import com.reddate.did.sdk.param.req.QueryPermission;
 import com.reddate.did.sdk.param.req.QueryResourceHistory;
@@ -20,6 +21,7 @@ import com.reddate.did.sdk.param.req.RegisterCpt;
 import com.reddate.did.sdk.param.req.ResetDidAuth;
 import com.reddate.did.sdk.param.req.RevokeCredential;
 import com.reddate.did.sdk.param.req.SaveResource;
+import com.reddate.did.sdk.param.req.TransferOwner;
 import com.reddate.did.sdk.param.resp.DidDataWrapper;
 import com.reddate.did.sdk.param.resp.GrantPermissionInfo;
 import com.reddate.did.sdk.param.resp.PermissionInfo;
@@ -39,8 +41,6 @@ import com.reddate.did.sdk.service.AuthIssuerService;
 import com.reddate.did.sdk.service.CredentialService;
 import com.reddate.did.sdk.service.DidService;
 import com.reddate.did.sdk.service.HubService;
-import com.reddate.did.sdk.util.AesUtils;
-import com.reddate.did.sdk.util.Secp256Util;
 
 /**
  * Did SDK main class, all the BSN did service can be called by this class
@@ -78,20 +78,31 @@ public class DidClient {
 	private HubService hubService;
 
 	/**
-	 * Did client construct
-	 * 
+	 * Did client construct for connect to the BSN did service
 	 * 
 	 * @param url       BSN did service URL
 	 * @param projectId The project Id of BSN assign
 	 * @param token     The Token of BSN assign
 	 */
 	public DidClient(String url, String projectId, String token) {
-		didService = new DidService(url, projectId, token);
-		authIssuerService = new AuthIssuerService(url, projectId, token);
-		credentialService = new CredentialService(url, projectId, token);
-		hubService = new HubService(url, projectId, token);
+		this(url, projectId, token,CryptoType.ECDSA);
 	}
-
+	
+	/**
+	 * Did client construct for connect to the self-deployed did service 
+	 * 
+	 * @param url       did service URL
+	 * @param projectId The project Id 
+	 * @param token     The Token 
+	 * @param hubCryptoType hub's crypto type
+	 */
+	public DidClient(String url, String projectId, String token,CryptoType hubCryptoType) {
+		didService = new DidService(url, projectId, token,hubCryptoType);
+		authIssuerService = new AuthIssuerService(url, projectId, token, hubCryptoType);
+		credentialService = new CredentialService(url, projectId, token, hubCryptoType);
+		hubService = new HubService(url, projectId, token, hubCryptoType);
+	}
+	
 	/**
 	 * Create did document and store this document on block chain if choose store on
 	 * block chain.
@@ -107,7 +118,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 
 		if (!genDidResult.isSuccess()) {
@@ -132,12 +143,9 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 
-		if (!verifyResult.isSuccess()) {
-			throw new DidException(verifyResult.getCode(), verifyResult.getMsg());
-		}
 		return verifyResult.getData();
 	}
 
@@ -150,19 +158,15 @@ public class DidClient {
 	 * @return document On-chain result
 	 */
 	public Boolean storeDidDocumentOnChain(DidDocument didDocument) {
-		ResultData<Boolean> storeResult = null;
 		try {
-			storeResult = didService.storeDidDocumentOnChain(didDocument);
+			didService.storeDidDocumentOnChain(didDocument);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 
-		if (!storeResult.isSuccess()) {
-			throw new DidException(storeResult.getCode(), storeResult.getMsg());
-		}
 		return true;
 	}
 
@@ -182,12 +186,9 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 
-		if (!queryDidDocResult.isSuccess()) {
-			throw new DidException(queryDidDocResult.getCode(), queryDidDocResult.getMsg());
-		}
 		return queryDidDocResult.getData();
 	}
 
@@ -207,14 +208,37 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
-		}
-
-		if (!restAuth.isSuccess()) {
-			throw new DidException(restAuth.getCode(), restAuth.getMsg());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 
 		return restAuth.getData();
+	}
+	
+	
+	/**
+	 * 
+	 * Verify the sign value of the did identify is correct or not  by the did identify related document's public key.
+	 * 
+	 *
+	 * @param didSign the did identify and did identify's sign value
+	 * @return Return the verify did identify result
+	 */
+	public Boolean verifyDIdSign(DidSign didSign) {
+		ResultData<Boolean> verifyResult = null;
+		try {
+			verifyResult = didService.verifyDIdSign(didSign);
+		} catch (DidException e) {
+			throw e;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(),e.getMessage());
+		}
+		
+		if(!verifyResult.isSuccess()) {
+			throw new DidException(verifyResult.getCode(),verifyResult.getMsg());
+		}
+		
+		return verifyResult.getData();
 	}
 
 	/**
@@ -234,7 +258,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -250,14 +274,14 @@ public class DidClient {
 	 * @param query The page info and did identify
 	 * @return return the authority list
 	 */
-	public Pages<AuthorityIssuer> queryAuthIssuerList(AuthIssuerList query) {
+	public Pages<AuthorityIssuer> queryAuthIssuerList(AuthIssuer query) {
 		try {
 			return authIssuerService.queryAuthIssuerList(query);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -277,7 +301,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -288,18 +312,15 @@ public class DidClient {
 	 * @param query Page information and authority issuer
 	 * @return Return the CPT template list
 	 */
-	public Pages<CptInfo> queryCptListByDid(QueryCptList query) {
-		Pages<CptInfo> cptPages = null;
+	public Pages<CptInfo> queryCptListByDid(QueryCpt query) {
 		try {
-			cptPages = authIssuerService.queryCptListByDid(query);
+			return authIssuerService.queryCptListByDid(query);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
-
-		return cptPages;
 	}
 
 	/**
@@ -315,7 +336,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -333,7 +354,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -356,7 +377,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -381,7 +402,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -401,7 +422,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -409,35 +430,65 @@ public class DidClient {
 	 * Query the revoked credential and and the revocation time, can query by the
 	 * crednential's issuer did, also can query by the credential Id
 	 * 
-	 * @param queryCredentialList Paging information and authority issuer did
+	 * @param queryCredential Paging information and authority issuer did
 	 * @return Return the credential List
 	 */
-	public Pages<BaseCredential> getRevokedCredList(QueryCredentialList queryCredentialList) {
+	public Pages<BaseCredential> getRevokedCredList(QueryCredential queryCredential) {
 		try {
-			return credentialService.getRevokedCredList(queryCredentialList);
+			return credentialService.getRevokedCredList(queryCredential);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
 	/**
-	 * Register and did user to be a identify hub user.
+	 * Register the did user to be a identify hub user.
 	 * 
 	 * @param did       The register did user
-	 * @param publicKey This did user's public key
 	 * @return Return the register result
 	 */
-	public RegisterHubResult registerHub(String did, String publicKey) {
+	public RegisterHubResult registerHubByDid(String did) {
 		try {
-			return hubService.registerHub(did, publicKey);
+			return hubService.registerHub(did);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
+		}
+	}
+	
+	/**
+	 * Register a identify hub user by the public key.
+	 * 
+	 * @param publicKey decimal public key String
+	 * @param cryptoType encryption Algorithm 
+	 * @return Return the register result
+	 */
+	public RegisterHubResult registerHub(String publicKey,CryptoType cryptoType) {
+		return registerHub(null, publicKey,cryptoType);
+	}
+	
+	
+	/**
+	 * Register a identify hub user by the public key.
+	 * 
+	 * @param id  hub user id
+	 * @param publicKey decimal public key String
+	 * @param cryptoType encryption Algorithm 
+	 * @return Return the register result
+	 */
+	public RegisterHubResult registerHub(String id, String publicKey,CryptoType cryptoType) {
+		try {
+			return hubService.registerHubByIdPublicKey(id, publicKey, cryptoType);
+		} catch (DidException e) {
+			throw e;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -456,7 +507,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -464,19 +515,19 @@ public class DidClient {
 	 * Query the saved resource in the identify hub, return the saved resource
 	 * information
 	 * 
-	 * @param did        The identify hub user's did
+	 * @param uid        user id
 	 * @param privateKey The identify hub user's private key
 	 * @param url        The resource URL in identify hub
 	 * @return Return the resource encrypt content and encrypt Key
 	 */
-	public QueryResourceResp getResource(String did, String privateKey, String url) {
+	public QueryResourceResp getResource(String uid, String privateKey, String url) {
 		try {
-			return hubService.getResource(did, privateKey, url);
+			return hubService.getResource(uid, privateKey, url);
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -485,20 +536,20 @@ public class DidClient {
 	 * hub user's permission first, if this user have permission, then delete this
 	 * permission.
 	 * 
-	 * @param did        The identify hub user's did
+	 * @param uid        user id
 	 * @param privateKey The identify hub user's private key
 	 * @param url        The resource user in identify hub
 	 * @return Return the delete result
 	 */
-	public Boolean deleteResource(String did, String privateKey, String url) {
+	public Boolean deleteResource(String uid, String privateKey, String url) {
 		try {
-			return hubService.deleteResource(did, privateKey, url);
+			return hubService.deleteResource(uid, privateKey, url);
 
 		} catch (DidException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -518,7 +569,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -539,7 +590,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -559,7 +610,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -579,7 +630,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -598,7 +649,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -616,7 +667,7 @@ public class DidClient {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
 
@@ -629,21 +680,58 @@ public class DidClient {
 	 * @param privateKey the private key
 	 * @return return the plaintext content
 	 */
-	public static String decrypt(String content, String encptyKey, String privateKey) {
-		String key = null;
+	public String decrypt(String content, String encptyKey, String privateKey) {
+		return hubService.decrypt(content, encptyKey, privateKey);
+	}
+	
+	/**
+	 * Generate public and private key through mnemonics. 
+	 * The mnemonic should consist of 16 English words.
+	 * 
+	 * The same mnemonic will generate the same public and private key.
+	 * 
+	 * @param mnemList English words
+	 * @return return public and private key
+	 */
+	public static KeyPair generalKeyPairByMnemonic(List<String> mnemList) {
+		return DidService.generalKeyPairByMnemonic(mnemList);
+	} 
+	
+	/**
+	 * Change the data's owner to the new user in the hub
+	 * 
+	 * This transfer change the data's owner and re-encryption key
+	 * 
+	 * @param transferOwner transfer data owner request parameter info
+	 * @return return true if transfer the data owner to the new user success
+	 */
+	public Boolean transferOwner(TransferOwner transferOwner) {
 		try {
-			key = Secp256Util.decrypt(CryptoType.ECDSA, encptyKey, privateKey);
+			return hubService.transferOwner(transferOwner);
+		} catch (DidException e) {
+			throw e;
 		} catch (Exception e) {
-			// throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
-			throw new DidException(ErrorMessage.DECRYPT_KEY_FAILED.getCode(),
-					ErrorMessage.DECRYPT_KEY_FAILED.getMessage() + ": " + e.getMessage());
-		}
-		try {
-			return AesUtils.decrypt(content, key);
-		} catch (Exception e) {
-			// throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
-			throw new DidException(ErrorMessage.DECRYPT_CONTENT_FAILED.getCode(),
-					ErrorMessage.DECRYPT_CONTENT_FAILED.getMessage() + ": " + e.getMessage());
+			e.printStackTrace();
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 	}
+	
+	/**
+	 * Query current block number and group id
+	 * 
+	 * @return return current block number and group id
+	 */
+	public BlockInfoResp getBLockInfo() {
+		return didService.getBlockInfo();
+	}
+	
+	/**
+	 * Get the identify hub's Crypto Type
+	 * 
+	 * @return return the identify hub's Crypto Type
+	 */
+	public CryptoType getHubCryptoType() {
+		return hubService.getCryptoType();
+	}
+	
 }

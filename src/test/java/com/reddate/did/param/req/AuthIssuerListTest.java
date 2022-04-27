@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.reddate.did.sdk.param.req.AuthIssuerList;
+import com.reddate.did.sdk.param.req.AuthIssuer;
 
 public class AuthIssuerListTest {
     @Test
     public void testConstructor() {
-        AuthIssuerList actualAuthIssuerList = new AuthIssuerList();
+        AuthIssuer actualAuthIssuerList = new AuthIssuer();
         actualAuthIssuerList.setDid("Did");
         actualAuthIssuerList.setPage(1);
         actualAuthIssuerList.setSize(3);

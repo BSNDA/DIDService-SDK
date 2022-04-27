@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.reddate.did.sdk.param.req.QueryCptList;
+import com.reddate.did.sdk.param.req.QueryCpt;
 
 public class QueryCptListTest {
     @Test
     public void testConstructor() {
-        QueryCptList actualQueryCptList = new QueryCptList();
+        QueryCpt actualQueryCptList = new QueryCpt();
         actualQueryCptList.setDid("Did");
         actualQueryCptList.setPage(1);
         actualQueryCptList.setSize(3);

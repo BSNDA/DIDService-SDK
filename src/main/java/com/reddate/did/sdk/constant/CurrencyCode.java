@@ -47,7 +47,7 @@ public class CurrencyCode {
 	public static final String ALTERNATE_PUBLIC_KEY_ID = "#keys-2";
 
 	/**
-	 * Regular verification of did identifier
+	 * Did identifier's regular verification
 	 */
 	public static final String DID_IDENTIFIER_PATTERN = "[a-zA-Z0-9]{27,28}";
 

@@ -10,8 +10,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.reddate.did.sdk.constant.ErrorMessage;
 import com.reddate.did.sdk.constant.ServiceURL;
 import com.reddate.did.sdk.exception.DidException;
-import com.reddate.did.sdk.param.req.AuthIssuerList;
-import com.reddate.did.sdk.param.req.QueryCptList;
+import com.reddate.did.sdk.param.CryptoType;
+import com.reddate.did.sdk.param.req.AuthIssuer;
+import com.reddate.did.sdk.param.req.QueryCpt;
 import com.reddate.did.sdk.param.req.RegisterAuthorityIssuer;
 import com.reddate.did.sdk.param.req.RegisterCpt;
 import com.reddate.did.sdk.protocol.request.AuthIssuerListWrapper;
@@ -27,6 +28,7 @@ import com.reddate.did.sdk.protocol.response.AuthorityIssuer;
 import com.reddate.did.sdk.protocol.response.CptBaseInfo;
 import com.reddate.did.sdk.protocol.response.Pages;
 import com.reddate.did.sdk.protocol.response.ResultData;
+import com.reddate.did.sdk.util.CptJsonSchemaUtils;
 import com.reddate.did.sdk.util.CptUtils;
 import com.reddate.did.sdk.util.ECDSAUtils;
 import com.reddate.did.sdk.util.GenerateCptIdUtils;
@@ -36,8 +38,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class AuthIssuerService extends BaseService {
 
-	public AuthIssuerService(String url, String projectId, String token) {
-		super(url, projectId, token);
+	public AuthIssuerService(String url, String projectId, String token, CryptoType cryptoType) {
+		super(url, projectId, token, cryptoType);
 	}
 
 	/**
@@ -53,32 +55,21 @@ public class AuthIssuerService extends BaseService {
 		if (ObjectUtil.isEmpty(register)) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "register is empty");
 		}
-		if (StringUtils.isEmpty(register.getName())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "register name is empty");
+		if (StringUtils.isBlank(register.getName())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "register.name is empty");
 		}
-		if (StringUtils.isEmpty(register.getDid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "register did is empty");
+		if (StringUtils.isBlank(register.getDid())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "register.did is empty");
 		}
-		if (StringUtils.isEmpty(register.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "register private key is empty");
+		if (StringUtils.isBlank(register.getPrivateKey())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "register.privateKey is empty");
 		}
 		RegisterAuthorityIssuerWrapper req = new RegisterAuthorityIssuerWrapper();
 		req.setDid(register.getDid());
 		req.setName(register.getName());
 
-		String publicKey = null;
-		try {
-			publicKey = ECDSAUtils.getPublicKey(register.getPrivateKey());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		String publicKeySign = null;
-		try {
-			publicKeySign = ECDSAUtils.sign(publicKey, register.getPrivateKey());
-		} catch (Exception e1) {
-			throw new DidException(ErrorMessage.PRIVATE_KEY_ILLEGAL_FORMAT.getCode(),
-					ErrorMessage.PRIVATE_KEY_ILLEGAL_FORMAT.getMessage());
-		}
+		String publicKey = ECDSAUtils.getPublicKey(register.getPrivateKey());
+		String publicKeySign = ECDSAUtils.sign(publicKey, register.getPrivateKey());
 		req.setPublicKeySign(publicKeySign);
 
 		String sign = Signatures.get().setInfo(this.getProjectId(), register.getDid()).add("name", register.getName())
@@ -91,9 +82,6 @@ public class AuthIssuerService extends BaseService {
 
 		ResultData<Boolean> regResult = HttpUtils.postCall(this.getUrl() + ServiceURL.REGISTER_AUTH_ISSUER,
 				this.getToken(), reqParam, Boolean.class);
-		if (!regResult.isSuccess()) {
-			throw new DidException(regResult.getCode(), regResult.getMsg());
-		}
 
 		return regResult.isSuccess();
 	}
@@ -110,10 +98,10 @@ public class AuthIssuerService extends BaseService {
 	 * @param query The page info and did identify
 	 * @return return the authority list
 	 */
-	public Pages<AuthorityIssuer> queryAuthIssuerList(AuthIssuerList query) {
+	public Pages<AuthorityIssuer> queryAuthIssuerList(AuthIssuer query) {
 
 		if (ObjectUtil.isEmpty(query)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "query param is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "query is empty");
 		}
 		if (query.getPage() == null) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "page is empty");
@@ -132,9 +120,6 @@ public class AuthIssuerService extends BaseService {
 
 		ResultData<Map> pageResult = HttpUtils.postCall(this.getUrl() + ServiceURL.QUERY_AUTH_ISSUER_LIST,
 				this.getToken(), reqParam, Map.class);
-		if (!pageResult.isSuccess()) {
-			throw new DidException(pageResult.getCode(), pageResult.getMsg());
-		}
 
 		Pages<AuthorityIssuer> pages = this.parseToPage(pageResult.getData(), AuthorityIssuer.class);
 
@@ -151,26 +136,25 @@ public class AuthIssuerService extends BaseService {
 	 */
 	public CptBaseInfo registerCpt(RegisterCpt registerCpt) {
 		if (ObjectUtil.isEmpty(registerCpt)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "register cpt is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "registerCpt is empty");
 		}
-		if (StringUtils.isEmpty(registerCpt.getDescription())) {
+		if (StringUtils.isBlank(registerCpt.getDescription())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "description is empty");
 		}
-		if (StringUtils.isEmpty(registerCpt.getTitle())) {
+		if (StringUtils.isBlank(registerCpt.getTitle())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "title is empty");
 		}
-		if (StringUtils.isEmpty(registerCpt.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "private key is empty");
+		if (StringUtils.isBlank(registerCpt.getPrivateKey())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
 		}
-		if (StringUtils.isEmpty(registerCpt.getType())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "type key is empty");
+		if (StringUtils.isBlank(registerCpt.getType())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "type is empty");
 		}
-		if (StringUtils.isEmpty(registerCpt.getDid())) {
+		if (StringUtils.isBlank(registerCpt.getDid())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is empty");
 		}
-		if (ObjectUtil.isEmpty(registerCpt.getCptJsonSchema())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cpt json schema is empty");
-		}
+		CptJsonSchemaUtils.validateJsonSchema(registerCpt.getCptJsonSchema());
+
 		RegisterCptWrapper registerCptWrapper = new RegisterCptWrapper();
 		registerCptWrapper.setCptId(registerCpt.getCptId());
 		registerCptWrapper.setDid(registerCpt.getDid());
@@ -194,16 +178,8 @@ public class AuthIssuerService extends BaseService {
 		registerCptWrapper.setCreate(nowStr);
 		registerCptWrapper.setUpdate(nowStr);
 		registerCptWrapper.setCptId(GenerateCptIdUtils.getId());
-
 		CptInfo cptInfo = CptUtils.assemblyCptInfo(registerCptWrapper);
-		String signValue = null;
-		try {
-			signValue = ECDSAUtils.sign(JSONArray.toJSON(cptInfo).toString(), registerCpt.getPrivateKey());
-		} catch (Exception e1) {
-			e1.printStackTrace();
-			throw new DidException(ErrorMessage.SIGNATURE_FAILED.getCode(), ErrorMessage.SIGNATURE_FAILED.getMessage());
-		}
-
+		String signValue = ECDSAUtils.sign(JSONArray.toJSON(cptInfo).toString(), registerCpt.getPrivateKey());
 		Proof proof = new Proof();
 		proof.setCreator(registerCpt.getDid());
 		proof.setSignatureValue(signValue);
@@ -223,9 +199,6 @@ public class AuthIssuerService extends BaseService {
 
 		ResultData<CptBaseInfo> cptBaseInfo = HttpUtils.postCall(this.getUrl() + ServiceURL.REGISTER_CPT,
 				this.getToken(), reqParam, CptBaseInfo.class);
-		if (!cptBaseInfo.isSuccess()) {
-			throw new DidException(cptBaseInfo.getCode(), cptBaseInfo.getMsg());
-		}
 
 		return cptBaseInfo.getData();
 	}
@@ -237,11 +210,11 @@ public class AuthIssuerService extends BaseService {
 	 * @param query Page information and authority issuer
 	 * @return Return the CPT template list
 	 */
-	public Pages<CptInfo> queryCptListByDid(QueryCptList queryCpt) {
+	public Pages<CptInfo> queryCptListByDid(QueryCpt queryCpt) {
 		if (ObjectUtil.isEmpty(queryCpt)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "query param is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "queryCpt is empty");
 		}
-		if (StringUtils.isEmpty(queryCpt.getDid())) {
+		if (StringUtils.isBlank(queryCpt.getDid())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is empty");
 		}
 		if (ObjectUtil.isEmpty(queryCpt.getPage())) {
@@ -259,11 +232,8 @@ public class AuthIssuerService extends BaseService {
 
 		ResultData<Map> cptListResult = HttpUtils.postCall(this.getUrl() + ServiceURL.QUERY_CPT_DID, this.getToken(),
 				reqParam, Map.class);
-		if (!cptListResult.isSuccess()) {
-			throw new DidException(cptListResult.getCode(), cptListResult.getMsg());
-		}
 
-		Pages<CptInfo> pages = this.parseToPage(cptListResult.getData(), AuthorityIssuer.class);
+		Pages<CptInfo> pages = this.parseToPage(cptListResult.getData(), CptInfo.class);
 		return pages;
 	}
 
@@ -275,7 +245,7 @@ public class AuthIssuerService extends BaseService {
 	 */
 	public CptInfo queryCptById(Long cptId) {
 		if (cptId == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cpt id is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cptId is empty");
 		}
 		RequestParam<QueryCptByIdWrapper> reqParam = new RequestParam<>(this.getProjectId(), null);
 		QueryCptByIdWrapper query = new QueryCptByIdWrapper();
@@ -284,9 +254,6 @@ public class AuthIssuerService extends BaseService {
 
 		ResultData<CptInfo> cptInfo = HttpUtils.postCall(this.getUrl() + ServiceURL.QUERY_CPT_INFO, this.getToken(),
 				reqParam, CptInfo.class);
-		if (!cptInfo.isSuccess()) {
-			throw new DidException(cptInfo.getCode(), cptInfo.getMsg());
-		}
 
 		return cptInfo.getData();
 	}
@@ -300,29 +267,28 @@ public class AuthIssuerService extends BaseService {
 	 */
 	public CptBaseInfo updateCpt(RegisterCpt registerCpt) {
 		if (ObjectUtil.isEmpty(registerCpt)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "register cpt is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "registerCpt is empty");
 		}
 		if (ObjectUtil.isEmpty(registerCpt.getCptId())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cpt id is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cptId is empty");
 		}
-		if (StringUtils.isEmpty(registerCpt.getDescription())) {
+		if (StringUtils.isBlank(registerCpt.getDescription())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "description is empty");
 		}
-		if (StringUtils.isEmpty(registerCpt.getTitle())) {
+		if (StringUtils.isBlank(registerCpt.getTitle())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "title is empty");
 		}
-		if (StringUtils.isEmpty(registerCpt.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "private key is empty");
+		if (StringUtils.isBlank(registerCpt.getPrivateKey())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
 		}
-		if (StringUtils.isEmpty(registerCpt.getType())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "type key is empty");
+		if (StringUtils.isBlank(registerCpt.getType())) {
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "type is empty");
 		}
-		if (StringUtils.isEmpty(registerCpt.getDid())) {
+		if (StringUtils.isBlank(registerCpt.getDid())) {
 			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is empty");
 		}
-		if (ObjectUtil.isEmpty(registerCpt.getCptJsonSchema())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cpt json schema is empty");
-		}
+		CptJsonSchemaUtils.validateJsonSchema(registerCpt.getCptJsonSchema());
+
 		RegisterCptWrapper registerCptWrapper = new RegisterCptWrapper();
 		CptInfo onChainCptInfo = this.queryCptById(registerCpt.getCptId());
 		if (onChainCptInfo == null) {
@@ -367,13 +333,7 @@ public class AuthIssuerService extends BaseService {
 		cptInfo.setCptJsonSchema(cptJsonSchema);
 
 		cptInfo.setCptVersion(onChainCptInfo.getCptVersion() + 1);
-		String signValue = null;
-		try {
-			signValue = ECDSAUtils.sign(JSONArray.toJSON(cptInfo).toString(), registerCpt.getPrivateKey());
-		} catch (Exception e1) {
-			e1.printStackTrace();
-			throw new DidException(ErrorMessage.SIGNATURE_FAILED.getCode(), ErrorMessage.SIGNATURE_FAILED.getMessage());
-		}
+		String signValue = ECDSAUtils.sign(JSONArray.toJSON(cptInfo).toString(), registerCpt.getPrivateKey());
 
 		Proof proof = new Proof();
 		proof.setCreator(registerCpt.getDid());
@@ -394,9 +354,6 @@ public class AuthIssuerService extends BaseService {
 
 		ResultData<CptBaseInfo> cptBaseInfo = HttpUtils.postCall(this.getUrl() + ServiceURL.UPDATE_CPT, this.getToken(),
 				reqParam, CptBaseInfo.class);
-		if (!cptBaseInfo.isSuccess()) {
-			throw new DidException(cptBaseInfo.getCode(), cptBaseInfo.getMsg());
-		}
 
 		return cptBaseInfo.getData();
 	}

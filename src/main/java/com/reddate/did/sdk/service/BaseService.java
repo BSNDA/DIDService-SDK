@@ -3,6 +3,7 @@ package com.reddate.did.sdk.service;
 import java.util.List;
 import java.util.Map;
 
+import com.reddate.did.sdk.param.CryptoType;
 import com.reddate.did.sdk.protocol.response.Pages;
 
 /**
@@ -17,11 +18,14 @@ public class BaseService {
 
 	private String projectId;
 
-	public BaseService(String url, String projectId, String token) {
+	protected CryptoType cryptoType;
+
+	public BaseService(String url, String projectId, String token, CryptoType cryptoType) {
 		super();
 		this.url = url;
 		this.token = token;
 		this.projectId = projectId;
+		this.cryptoType = cryptoType;
 	}
 
 	public String getToken() {
@@ -36,15 +40,19 @@ public class BaseService {
 		return url;
 	}
 
+	public CryptoType getCryptoType() {
+		return cryptoType;
+	}
+
 	/**
-	 * Parse a map type page info to Pages type
+	 * Convert map to Pages
 	 * 
 	 * @param <T>         the business data class type
 	 * @param pageMap     Page information Map
 	 * @param elementType the business data class type
 	 * @return Return the Pages information
 	 */
-	public <T> Pages<T> parseToPage(Map pageMap, Class elementType) {
+	public <T> Pages<T> parseToPage(Map pageMap, Class<T> elementType) {
 		Pages<T> page = new Pages<>();
 		page.setPage((Integer) pageMap.get("page"));
 		page.setSize((Integer) pageMap.get("size"));

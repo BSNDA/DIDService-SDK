@@ -8,6 +8,8 @@ import org.fisco.bcos.web3j.crypto.gm.sm2.SM2Sign;
 import org.fisco.bcos.web3j.crypto.gm.sm3.SM3Digest;
 import org.fisco.bcos.web3j.utils.Numeric;
 
+import com.reddate.did.sdk.constant.ErrorMessage;
+import com.reddate.did.sdk.exception.DidException;
 import com.reddate.did.sdk.protocol.common.KeyPair;
 
 import java.math.BigInteger;
@@ -51,7 +53,8 @@ public class ECDSAUtils {
             return String.valueOf(keyPair.getPublicKey());
         }catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException("invalid privateKey");
+            throw new DidException(ErrorMessage.PRIVATE_KEY_ILLEGAL_FORMAT.getCode(),
+					ErrorMessage.PRIVATE_KEY_ILLEGAL_FORMAT.getMessage());
         }
     }
     
@@ -61,9 +64,14 @@ public class ECDSAUtils {
      * @param message
      * @param privateKey
      */
-    public static String sign(String message, String privateKey) throws Exception {
-    	SignatureData sigData = secp256k1SignToSignature(message, new BigInteger(privateKey));
-        return secp256k1SigBase64Serialization(sigData);
+    public static String sign(String message, String privateKey){
+    	try {
+			SignatureData sigData = secp256k1SignToSignature(message, new BigInteger(privateKey));
+			return secp256k1SigBase64Serialization(sigData);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DidException(ErrorMessage.SIGNATURE_FAILED.getCode(), ErrorMessage.SIGNATURE_FAILED.getMessage());
+		}
     }
     
     public static SignatureData secp256k1SignToSignature(String rawData, BigInteger privateKey) {

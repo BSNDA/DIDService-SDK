@@ -48,21 +48,23 @@ public class HttpUtils<T> {
 				logger.debug("The request URL is: {} ,The request Data is: {}", url,
 						JSONObject.toJSONString(requestParam));
 			}
+			//System.out.println("The request URL is: "+url+" ,The request Data is: "+JSONObject.toJSONString(requestParam));
 			response = client.newCall(request).execute();
 			int httpResonseCode = response.code();
 			if (httpResonseCode != 200) {
 				response.close();
-				throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), "call did service failed");
+				throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+"service http code is "+httpResonseCode);
 			}
 			resposneDataStr = response.body().string();
 			response.close();
 			if (logger.isDebugEnabled()) {
 				logger.debug("The response data is: {}", resposneDataStr);
 			}
+			//System.out.println("The response data is: "+resposneDataStr);
 		} catch (IOException e) {
 			e.printStackTrace();
 			response.close();
-			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), e.getMessage());
+			throw new DidException(ErrorMessage.UNKNOWN_ERROR.getCode(), ErrorMessage.UNKNOWN_ERROR.getMessage()+e.getMessage());
 		}
 
 		JSONObject resultJson = JSONObject.parseObject(resposneDataStr);
@@ -70,8 +72,9 @@ public class HttpUtils<T> {
 		Integer resultCode = resultJson.getInteger("code");
 		result.setCode(resultCode);
 		if (resultCode != 0) {
-			result.setMsg(resultJson.getString("msg"));
+			throw new DidException(resultCode, resultJson.getString("msg"));
 		}
+		
 		Object obj = resultJson.get("data");
 		if (obj != null) {
 			if (obj instanceof JSONObject) {

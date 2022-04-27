@@ -24,6 +24,12 @@ public class ServiceURL {
 	 * URL of reset did document main authenticate service endpoint in BSN
 	 */
 	public static final String REST_DID_AUTH = "/did/resetDidAuth";
+	
+	/**
+	 * URL of verify did identifier sign service endpoint in BSN
+	 * 
+	 */
+	public static final String VERIFY_DID_SIGN = "/did/verifyDIdSign";
 
 	/**
 	 * URL of register authenticate issuer service endpoint in BSN
@@ -79,7 +85,14 @@ public class ServiceURL {
 	 * URL of register an identify HUB user service endpoint in BSN
 	 */
 	public static final String HUB_REGISTER = "/hub/regiter";
+	
+	public static final String HUB_QUEERY_TYPE = "/hub/getType";
 
+	/**
+	 * URL of register an identify HUB user by public key service endpoint in BSN
+	 */
+	public static final String HUB_REGISTER_BY_PUBLIOCKEY = "/hub/regiterByIdPublicKey";
+	
 	/**
 	 * URL of save some resource to identify HUB service endpoint in BSN
 	 */
@@ -130,4 +143,15 @@ public class ServiceURL {
 	 */
 	public static final String HUB_CHECK_PERMISSION = "/hub/checkPermission";
 
+	
+	/**
+	 * URL of query current block info in BSN
+	 */
+	public static final String GET_BLOCK_INFO = "/did/getBlockInfo";
+	
+	/**
+	 * URL of transfer owner in identify HUB service endpoint in BSN
+	 */
+	public static final String HUB_TRANSFER_OWNER = "/hub/transferOwner";
+	
 }

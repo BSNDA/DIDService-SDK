@@ -8,9 +8,9 @@ import java.io.Serializable;
 public class CreatePermission implements Serializable {
 
 	/**
-	 * resource owner did
+	 * resource owner user id
 	 */
-	private String did;
+	private String uid;
 
 	/**
 	 * resource url
@@ -23,9 +23,9 @@ public class CreatePermission implements Serializable {
 	private Operation grant;
 
 	/**
-	 * grant user did
+	 * grant user id
 	 */
-	private String grantDid;
+	private String grantUid;
 
 	/**
 	 * grant user public key
@@ -37,12 +37,12 @@ public class CreatePermission implements Serializable {
 	 */
 	private String privateKey;
 
-	public String getDid() {
-		return did;
+	public String getUid() {
+		return uid;
 	}
 
-	public void setDid(String did) {
-		this.did = did;
+	public void setUid(String uid) {
+		this.uid = uid;
 	}
 
 	public String getUrl() {
@@ -61,12 +61,12 @@ public class CreatePermission implements Serializable {
 		this.grant = grant;
 	}
 
-	public String getGrantDid() {
-		return grantDid;
+	public String getGrantUid() {
+		return grantUid;
 	}
 
-	public void setGrantDid(String grantDid) {
-		this.grantDid = grantDid;
+	public void setGrantUid(String grantUid) {
+		this.grantUid = grantUid;
 	}
 
 	public String getGrantPublicKey() {
@@ -84,5 +84,5 @@ public class CreatePermission implements Serializable {
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
 	}
-
+	
 }

@@ -2,33 +2,36 @@ package com.reddate.did.sdk.param.req;
 
 import java.io.Serializable;
 
+
 /**
- * Delete permission request data structure
+ * Transfer data owner request data structure
  */
-public class DeletePermission implements Serializable {
+public class TransferOwner implements Serializable{
 
 	/**
-	 * identify hub user did
+	 * user id
 	 */
 	private String uid;
-
+	
 	/**
 	 * resource url
 	 */
 	private String url;
-
+	
 	/**
-	 * grant identify hub user did
+	 * hub data new owner's user id
+	 * 
 	 */
-	private String grantUid;
-
+	private String newOwnerUid;
+	
 	/**
-	 * grant information
+	 * hub data new owner's public key
+	 * 
 	 */
-	private Operation grant;
-
+	private String newOwnerPublicKey;
+	
 	/**
-	 * identify hub user private key
+	 * user private key
 	 */
 	private String privateKey;
 
@@ -48,20 +51,20 @@ public class DeletePermission implements Serializable {
 		this.url = url;
 	}
 
-	public String getGrantUid() {
-		return grantUid;
+	public String getNewOwnerUid() {
+		return newOwnerUid;
 	}
 
-	public void setGrantUid(String grantUid) {
-		this.grantUid = grantUid;
+	public void setNewOwnerUid(String newOwnerUid) {
+		this.newOwnerUid = newOwnerUid;
 	}
 
-	public Operation getGrant() {
-		return grant;
+	public String getNewOwnerPublicKey() {
+		return newOwnerPublicKey;
 	}
 
-	public void setGrant(Operation grant) {
-		this.grant = grant;
+	public void setNewOwnerPublicKey(String newOwnerPublicKey) {
+		this.newOwnerPublicKey = newOwnerPublicKey;
 	}
 
 	public String getPrivateKey() {
@@ -71,5 +74,5 @@ public class DeletePermission implements Serializable {
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
 	}
-
+	
 }
