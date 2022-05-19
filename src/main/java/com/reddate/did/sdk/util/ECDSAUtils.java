@@ -57,7 +57,7 @@ public class ECDSAUtils {
 					ErrorMessage.PRIVATE_KEY_ILLEGAL_FORMAT.getMessage());
         }
     }
-    
+
     /**
      * Sign the message according to the private key
      * 

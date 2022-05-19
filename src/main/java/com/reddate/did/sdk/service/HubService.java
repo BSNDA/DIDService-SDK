@@ -69,7 +69,7 @@ public class HubService extends BaseService {
 	 */
 	public RegisterHubResult registerHub(String did) {
 		if (StringUtils.isBlank(did)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is null");
 		}
 		RequestParam<RegisterHubReq> reqParam = new RequestParam<>(this.getProjectId(), did);
 		RegisterHubReq registerHubReq = new RegisterHubReq();
@@ -97,11 +97,11 @@ public class HubService extends BaseService {
 	 */
 	public RegisterHubResult registerHubByIdPublicKey(String id, String publicKey,CryptoType cryptoType) {
 		if (StringUtils.isBlank(publicKey)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "publicKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "publicKey is null");
 		}
 		
 		if(cryptoType == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cryptoType is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cryptoType is null");
 		}
 		
 		RequestParam<RegisterHubByIdPublickeyReq> reqParam = new RequestParam<>(this.getProjectId(), null);
@@ -135,27 +135,27 @@ public class HubService extends BaseService {
 	 */
 	public SaveResourceResult saveResource(SaveResource saveResource) {
 		if (saveResource == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "saveResource is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "saveResource is null");
 		}
 		if (StringUtils.isBlank(saveResource.getUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is null");
 		}
 		if (StringUtils.isBlank(saveResource.getContent())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "content is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "content is null");
 		}
 		if (StringUtils.isBlank(saveResource.getOwnerUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "ownerUid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "ownerUid is null");
 		}
 		if (saveResource.getGrant() == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grant is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grant is null");
 		}
 		if (saveResource.getGrant() != Operation.WRITE) {
 			if (StringUtils.isBlank(saveResource.getUrl())) {
-				throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is empty");
+				throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is null");
 			}
 		}
 		if (StringUtils.isBlank(saveResource.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 
 		String encpyResourceKey = null;
@@ -229,15 +229,15 @@ public class HubService extends BaseService {
 	 */
 	public QueryResourceResp getResource(String uid, String privateKey, String url) {
 		if (StringUtils.isBlank(uid)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is null");
 		}
 
 		if (StringUtils.isBlank(privateKey)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 
 		if (StringUtils.isBlank(url)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is null");
 		}
 
 		RequestParam<QueryResourceReq> reqParam = new RequestParam<>(this.getProjectId(), uid);
@@ -270,15 +270,15 @@ public class HubService extends BaseService {
 	 */
 	public Boolean deleteResource(String uid, String privateKey, String url) {
 		if (StringUtils.isBlank(uid)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is null");
 		}
 
 		if (StringUtils.isBlank(privateKey)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 
 		if (StringUtils.isBlank(url)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is null");
 		}
 
 		RequestParam<DeleteResourceReq> reqParam = new RequestParam<>(this.getProjectId(), uid);
@@ -311,25 +311,25 @@ public class HubService extends BaseService {
 	 */
 	public CreatePermissionResp createPermission(CreatePermission createPermission) {
 		if (StringUtils.isBlank(createPermission.getUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is null");
 		}
 
 		if (StringUtils.isBlank(createPermission.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 
 		if (createPermission.getGrant() != Operation.WRITE) {
 			if (createPermission.getGrant() == null) {
-				throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grant is empty");
+				throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grant is null");
 			}
 		}
 
 		if (StringUtils.isBlank(createPermission.getGrantUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grantUid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grantUid is null");
 		}
 
 		if (StringUtils.isBlank(createPermission.getGrantPublicKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grantPublicKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grantPublicKey is null");
 		}
 
 		String grantEncryptKey = null;
@@ -394,27 +394,27 @@ public class HubService extends BaseService {
 	 */
 	public DeletePermissionResp deletePermission(DeletePermission deletePermission) {
 		if (deletePermission == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "deletePermission is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "deletePermission is null");
 		}
 
 		if (StringUtils.isBlank(deletePermission.getUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is null");
 		}
 
 		if (StringUtils.isBlank(deletePermission.getUrl())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is null");
 		}
 
 		if (StringUtils.isBlank(deletePermission.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 
 		if (StringUtils.isBlank(deletePermission.getGrantUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grantUid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grantUid is null");
 		}
 
 		if (deletePermission.getGrant() == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grant is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grant is null");
 		}
 
 		RequestParam<DeletePermissionReq> reqParam = new RequestParam<>(this.getProjectId(), deletePermission.getUid());
@@ -453,15 +453,15 @@ public class HubService extends BaseService {
 	 */
 	public List<PermissionInfo> queryPermission(QueryPermission queryPermission) {
 		if (queryPermission == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "queryPermission is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "queryPermission is null");
 		}
 
 		if (StringUtils.isBlank(queryPermission.getUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is null");
 		}
 
 		if (StringUtils.isBlank(queryPermission.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 
 		RequestParam<QueryPermissionReq> reqParam = new RequestParam<>(this.getProjectId(), queryPermission.getUid());
@@ -510,15 +510,15 @@ public class HubService extends BaseService {
 	 */
 	public List<GrantPermissionInfo> queryGrantPermission(QueryGrantedPermission queryPermission) {
 		if (queryPermission == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "queryPermission is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "queryPermission is null");
 		}
 
 		if (StringUtils.isBlank(queryPermission.getUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is null");
 		}
 
 		if (StringUtils.isBlank(queryPermission.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 
 		RequestParam<QueryGrantedPermissionReq> reqParam = new RequestParam<>(this.getProjectId(),
@@ -570,31 +570,31 @@ public class HubService extends BaseService {
 	 */
 	public CheckPermissionResp checkPermission(CheckPermission checkPermission) {
 		if (checkPermission == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "checkPermission is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "checkPermission is null");
 		}
 
 		if (StringUtils.isBlank(checkPermission.getUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is null");
 		}
 
 		if (StringUtils.isBlank(checkPermission.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 
 		if (StringUtils.isBlank(checkPermission.getUrl())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is null");
 		}
 
 		if (StringUtils.isBlank(checkPermission.getOwnerUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "ownerUid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "ownerUid is null");
 		}
 
 		if (StringUtils.isBlank(checkPermission.getGrantUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grantUid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grantUid is null");
 		}
 
 		if (checkPermission.getGrant() == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grant is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "grant is null");
 		}
 
 		RequestParam<CheckPermissionReq> reqParam = new RequestParam<>(this.getProjectId(), checkPermission.getUid());
@@ -626,15 +626,15 @@ public class HubService extends BaseService {
 	 */
 	public List<ResourceHistoryInfo> queryResourceHistory(QueryResourceHistory queryResourceHistory) {
 		if (queryResourceHistory == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "queryResourceHistory is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "queryResourceHistory is null");
 		}
 
 		if (StringUtils.isBlank(queryResourceHistory.getUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is null");
 		}
 
 		if (StringUtils.isBlank(queryResourceHistory.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 
 		RequestParam<QueryResourceHistoryReq> reqParam = new RequestParam<>(this.getProjectId(),
@@ -686,15 +686,15 @@ public class HubService extends BaseService {
 	 */
 	public String decrypt(String content, String encptyKey, String privateKey) {
 		if(content == null || content.trim().isEmpty()) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "content is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "content is null");
 		}
 		
 		if(encptyKey == null || encptyKey.trim().isEmpty()) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "encptyKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "encptyKey is null");
 		}
 
 		if(privateKey == null || privateKey.trim().isEmpty()) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 		
 		String key = null;
@@ -722,22 +722,22 @@ public class HubService extends BaseService {
 	 */
 	public Boolean transferOwner(TransferOwner transferOwner) {
 		if (transferOwner == null) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "transferOwner is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "transferOwner is null");
 		}
 		if (StringUtils.isBlank(transferOwner.getUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid is null");
 		}
 		if (StringUtils.isBlank(transferOwner.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 		if (StringUtils.isBlank(transferOwner.getUrl())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "url is null");
 		}
 		if (StringUtils.isBlank(transferOwner.getNewOwnerUid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "newOwnerUid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "newOwnerUid is null");
 		}
 		if (StringUtils.isBlank(transferOwner.getNewOwnerPublicKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "newOwnerPublicKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "newOwnerPublicKey is null");
 		}
 		
 		QueryResourceResp resourceInfo = this.getResource(transferOwner.getUid(), transferOwner.getPrivateKey(), transferOwner.getUrl());
@@ -773,7 +773,7 @@ public class HubService extends BaseService {
 	
 	public CryptoType getCryptoTypeByIdOrPublicKey(String uid,String publicKey) {
 		if ((uid == null || uid.trim().isEmpty()) && (publicKey == null || publicKey.trim().isEmpty())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid and publicKey are empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uid and publicKey are null");
 		}
 
 		RequestParam<QueryCryptoTypeReq> reqParam = new RequestParam<>(this.getProjectId(),uid);

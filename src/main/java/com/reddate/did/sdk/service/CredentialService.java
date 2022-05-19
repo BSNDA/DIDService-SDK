@@ -63,25 +63,25 @@ public class CredentialService extends BaseService {
 	 */
 	public CredentialWrapper createCredential(CreateCredential createCredential) {
 		if (ObjectUtil.isEmpty(createCredential)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "createCredential is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "createCredential is null");
 		}
 		if (ObjectUtil.isEmpty(createCredential.getClaim())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "claim is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "claim is null");
 		}
 		if (StringUtils.isBlank(createCredential.getIssuerDid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "issuerDid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "issuerDid is null");
 		}
 		if (StringUtils.isBlank(createCredential.getExpirationDate())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "expirationDate is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "expirationDate is null");
 		}
 		if (StringUtils.isBlank(createCredential.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 		if (StringUtils.isBlank(createCredential.getUserDid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "userDid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "userDid is null");
 		}
 		if (ObjectUtil.isEmpty(createCredential.getCptId())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cptId is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cptId is null");
 		}
 		ResultData<DidDocument> didResult = didService.getDidDocument(createCredential.getIssuerDid());
 		if (didResult == null) {
@@ -164,46 +164,46 @@ public class CredentialService extends BaseService {
 	 */
 	public Boolean verifyCredential(CredentialWrapper createCredential, PublicKey publicKey) {
 		if (ObjectUtil.isEmpty(createCredential)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "createCredential is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "createCredential is null");
 		}
 		if (ObjectUtil.isEmpty(createCredential.getClaim())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "claim is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "claim is null");
 		}
 		if (StringUtils.isBlank(createCredential.getIssuerDid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "issuerDid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "issuerDid is null");
 		}
 		if (StringUtils.isBlank(createCredential.getExpirationDate())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "expirationDate is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "expirationDate is null");
 		}
 		if (StringUtils.isBlank(createCredential.getType())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "type is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "type is null");
 		}
 		if (StringUtils.isBlank(createCredential.getCreated())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "created is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "created is null");
 		}
 		if (StringUtils.isBlank(createCredential.getContext())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "context is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "context is null");
 		}
 		if (ObjectUtil.isEmpty(createCredential.getProof())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "proof is null");
 		}
 		if (ObjectUtil.isEmpty(createCredential.getId())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "id is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "id is null");
 		}
 		if (StringUtils.isBlank(createCredential.getUserDid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "userDid is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "userDid is null");
 		}
 		if (ObjectUtil.isEmpty(createCredential.getCptId())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cptId is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cptId is null");
 		}
 		if (ObjectUtil.isEmpty(publicKey)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "publicKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "publicKey is null");
 		}
 		if (ObjectUtil.isEmpty(publicKey.getPublicKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "publicKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "publicKey is null");
 		}
 		if (ObjectUtil.isEmpty(publicKey.getType())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "publicKey.type is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "publicKey.type is null");
 		}
 
 		RequestParam<VerifyCredentialWrapper> reqParam = new RequestParam<>(this.getProjectId(),
@@ -228,19 +228,19 @@ public class CredentialService extends BaseService {
 	 */
 	public Boolean revokeCredential(RevokeCredential cred) {
 		if (ObjectUtil.isEmpty(cred)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cred is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cred is null");
 		}
 		if (StringUtils.isBlank(cred.getCredId())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "credId is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "credId is null");
 		}
 		if (StringUtils.isBlank(cred.getPrivateKey())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 		}
 		if (StringUtils.isBlank(cred.getDid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is null");
 		}
 		if (ObjectUtil.isEmpty(cred.getCptId())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cptId is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cptId is null");
 		}
 		RequestParam<RevokCredentialReq> reqParam = new RequestParam<>(this.getProjectId(), cred.getDid());
 		RevokCredentialReq revokCredentialReq = new RevokCredentialReq();
@@ -282,16 +282,16 @@ public class CredentialService extends BaseService {
 	 */
 	public Pages<BaseCredential> getRevokedCredList(QueryCredential queryCredential) {
 		if (ObjectUtil.isEmpty(queryCredential)) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "queryCredential is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "queryCredential is null");
 		}
 		if (StringUtils.isBlank(queryCredential.getDid())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "did is null");
 		}
 		if (ObjectUtil.isEmpty(queryCredential.getPage())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "page is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "page is null");
 		}
 		if (ObjectUtil.isEmpty(queryCredential.getSize())) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "size is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "size is null");
 		}
 		RequestParam<QueryCredentialWrapper> reqParam = new RequestParam<>(this.getProjectId(),
 				queryCredential.getDid());

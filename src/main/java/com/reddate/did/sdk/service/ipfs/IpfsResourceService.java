@@ -52,20 +52,20 @@ public class IpfsResourceService {
 	public SaveResource uploadResource(String uploadKey, String content, boolean encrypt, CryptoType cryptoType,
 			String privateKey) {
 		if (uploadKey == null || uploadKey.trim().isEmpty()) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uploadKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "uploadKey is null");
 		}
 
 		if (content == null || content.trim().isEmpty()) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "content is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "content is null");
 		}
 
 		if (encrypt) {
 			if (cryptoType == null) {
-				throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cryptoType is empty");
+				throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "cryptoType is null");
 			}
 
 			if (privateKey == null || privateKey.trim().isEmpty()) {
-				throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is empty");
+				throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "privateKey is null");
 			}
 		}
 
@@ -144,11 +144,11 @@ public class IpfsResourceService {
 	 */
 	public ResourceInfo downloadResource(String downloadKey, String hash) {
 		if (downloadKey == null || downloadKey.trim().isEmpty()) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "downloadKey is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "downloadKey is null");
 		}
 
 		if (hash == null || hash.trim().isEmpty()) {
-			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "hash is empty");
+			throw new DidException(ErrorMessage.PARAMETER_IS_EMPTY.getCode(), "hash is null");
 		}
 
 		String downloadURL = DOWNLOAD_FILE_URL.replace("{Key}", downloadKey) + hash;
