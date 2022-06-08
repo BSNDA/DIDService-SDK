@@ -20,7 +20,7 @@ public enum ErrorMessage {
 
 	DID_NOT_EXIST(1041, "DID does not exist"),
 
-	CPT_AND_ISSUER_CANNOT_MATCH(1062, "Issuer and publisherDid in the CPT do not match"),
+	CPT_AND_ISSUER_CANNOT_MATCH(1062, "privateKey does not match issuerDid"),
 
 	QUERY_GRANT_ENCPY_KEY_FAILED(1501, "Failed to query the encryption key of the granted resource"),
 
@@ -28,9 +28,9 @@ public enum ErrorMessage {
 
 	RESOURCE_NOT_EISTS(1418, "Resource does not exist"),
 
-	RECOVERY_KEY_INCORRECT(1504, "The recovery key pair is incorrect, cannot reset DID authentication"),
+	RECOVERY_KEY_INCORRECT(1504, " mismatch"),
 
-	PRK_PUK_NOT_MATCH(1306, " Public key format is invalid"),
+	PRK_PUK_NOT_MATCH(1306, " format is invalid"),
 
 	INVALID_DID(1043, "Invalid DID"),
 

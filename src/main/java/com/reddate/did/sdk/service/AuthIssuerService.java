@@ -207,7 +207,7 @@ public class AuthIssuerService extends BaseService {
 	 * Query all registered CPT templates under the issuer according to the DID
 	 * identifier of the issuer.
 	 * 
-	 * @param query Page information and authority issuer
+	 * @param queryCpt Page information and authority issuer
 	 * @return Return the CPT template list
 	 */
 	public Pages<CptInfo> queryCptListByDid(QueryCpt queryCpt) {

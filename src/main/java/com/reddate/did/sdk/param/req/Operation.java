@@ -21,5 +21,9 @@ public enum Operation {
 	/**
 	 * Delete permission
 	 */
-	DELETE
+	DELETE,
+	/**
+	 * Transfer permission
+	 */
+	TRANSFER
 }

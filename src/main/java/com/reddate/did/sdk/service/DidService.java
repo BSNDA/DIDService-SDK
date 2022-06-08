@@ -346,16 +346,16 @@ public class DidService extends BaseService {
 			throw new DidException(queryDidDocument.getCode(), queryDidDocument.getMsg());
 		}
 
-		String recoveryPublicKey = ECDSAUtils.getPublicKey(resetDidAuth.getRecoveryKey().getPrivateKey());
-		if (recoveryPublicKey == null
-				|| !recoveryPublicKey.equals(queryDidDocument.getData().getRecovery().getPublicKey())) {
-			throw new DidException(ErrorMessage.RECOVERY_KEY_INCORRECT.getCode(),
-					ErrorMessage.RECOVERY_KEY_INCORRECT.getMessage());
-		}
-
 		if(!isPublickKeyValid(resetDidAuth.getRecoveryKey().getPublicKey())){
 			throw new DidException(ErrorMessage.PRK_PUK_NOT_MATCH.getCode(),
-					ErrorMessage.PRK_PUK_NOT_MATCH.getMessage());
+					"recoveryKey.publicKey" + ErrorMessage.PRK_PUK_NOT_MATCH.getMessage());
+		}
+		String recoveryPublicKey = ECDSAUtils.getPublicKey(resetDidAuth.getRecoveryKey().getPrivateKey());
+		if (recoveryPublicKey == null
+				|| !recoveryPublicKey.equals(queryDidDocument.getData().getRecovery().getPublicKey())
+				|| !recoveryPublicKey.equals(resetDidAuth.getRecoveryKey().getPublicKey())) {
+			throw new DidException(ErrorMessage.RECOVERY_KEY_INCORRECT.getCode(),
+					"recoveryKey.privateKey and recoveryKey.publicKey" + ErrorMessage.RECOVERY_KEY_INCORRECT.getMessage());
 		}
 
 		DidDocument didDoc = queryDidDocument.getData();
@@ -368,10 +368,14 @@ public class DidService extends BaseService {
 				|| resetDidAuth.getPrimaryKeyPair().getType().trim().isEmpty()) {
 			keyPair = ECDSAUtils.createKey();
 		} else {
+			if(!isPublickKeyValid(resetDidAuth.getPrimaryKeyPair().getPublicKey())){
+				throw new DidException(ErrorMessage.PRK_PUK_NOT_MATCH.getCode(),
+						"primaryKeyPair.publicKey" + ErrorMessage.PRK_PUK_NOT_MATCH.getMessage());
+			}
 			String publicKey = ECDSAUtils.getPublicKey(resetDidAuth.getPrimaryKeyPair().getPrivateKey());
 			if (publicKey == null || !publicKey.equals(resetDidAuth.getPrimaryKeyPair().getPublicKey())) {
-				throw new DidException(ErrorMessage.PRK_PUK_NOT_MATCH.getCode(),
-						ErrorMessage.PRK_PUK_NOT_MATCH.getMessage());
+				throw new DidException(ErrorMessage.RECOVERY_KEY_INCORRECT.getCode(),
+						"primaryKeyPair.privateKey and primaryKeyPair.publicKey" + ErrorMessage.RECOVERY_KEY_INCORRECT.getMessage());
 			}
 		}
 
