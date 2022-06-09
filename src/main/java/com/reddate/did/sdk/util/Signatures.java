@@ -76,7 +76,7 @@ public class Signatures {
 	 */
 	public String sign(String privateKey) {
 		if (privateKey == null || privateKey.trim().isEmpty()) {
-			throw new RuntimeException("private key is empty");
+			throw new RuntimeException("Private key is empty");
 		}
 		return ECDSAUtils.sign(getSignStr(), privateKey);
 	}
@@ -90,7 +90,7 @@ public class Signatures {
 	 */
 	public String sign(CryptoType cryptoType, String privateKey) {
 		if (privateKey == null || privateKey.trim().isEmpty()) {
-			throw new RuntimeException("private key is empty");
+			throw new RuntimeException("Private key is empty");
 		}
 		return Secp256Util.sign(cryptoType, getSignStr(), privateKey);
 	}

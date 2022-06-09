@@ -90,6 +90,10 @@ public class Secp256Util {
 		return ecKeyPair.getPublicKey().toString();
 	}
 
+	public static void main(String[] args) {
+		System.out.println(getPublicKey(CryptoType.ECDSA, "177511339483322497155015102112935098674666504693652987703930042787508877099585"));
+	}
+
 	/**
 	 * Get the address form private key
 	 * 

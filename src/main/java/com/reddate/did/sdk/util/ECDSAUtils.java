@@ -57,7 +57,7 @@ public class ECDSAUtils {
 					ErrorMessage.PRIVATE_KEY_ILLEGAL_FORMAT.getMessage());
         }
     }
-    
+
     /**
      * Sign the message according to the private key
      * 
@@ -72,6 +72,12 @@ public class ECDSAUtils {
 			e.printStackTrace();
 			throw new DidException(ErrorMessage.SIGNATURE_FAILED.getCode(), ErrorMessage.SIGNATURE_FAILED.getMessage());
 		}
+    }
+
+    public static void main(String[] args) {
+
+        String sign = sign("did:bsn:BNs5BgsEU7PjWdAKE8ZLifsZ2cE", "16780098087725241378027720583043134163962766226428001721995781676508526587610");
+        System.out.println("------------------- 1 ---- sign = " + sign);
     }
     
     public static SignatureData secp256k1SignToSignature(String rawData, BigInteger privateKey) {

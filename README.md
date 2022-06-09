@@ -16,16 +16,16 @@ BSN currently provides a Java-based SDK, developers can quickly and easily acces
 ### Access Parameters
 - Gateway address
 
-	BSN China: `https://didservice.bsngate.com:18602`
+  BSN China: `https://didservice.bsngate.com:18602`
 
-	BSN International: `https://did.bsngate.com:18602`
+  BSN International: `https://did.bsngate.com:18602`
 
 - Public Test Parameters
 
-	`PROJECTID：8320935187`
-	
-	`TOKEN:3wxYHXwAm57grc9JUr2zrPHt9HC`
-	
+  `PROJECTID：8320935187`
+
+  `TOKEN:3wxYHXwAm57grc9JUr2zrPHt9HC`
+
 ### Steps to Use
 
 1. Compile and package the source code into a jar file named did-sdk-1.0.jar.
@@ -34,11 +34,11 @@ BSN currently provides a Java-based SDK, developers can quickly and easily acces
 
 3. Create an instance of DidClient, e.g.:
 
-	`DidClient didClient = new DidClient(URL, PROJECTID, TOKEN);`
-	
+   `DidClient didClient = new DidClient(URL, PROJECTID, TOKEN);`
+
 4. Call the methods within the SDK, such as:
 
-	`DidDataWrapper didData = didClient.createDid(true);`
+   `DidDataWrapper didData = didClient.createDid(true);`
 
 ### FAQ
 
@@ -63,8 +63,8 @@ The credential template belongs to the issuer and needs to be public and transpa
 
 1) After issuing the credential, the issuer directly returns the digital credential to the user and the user keeps it by himself.
 
-2) The credential is stored in the Identity Hub provided by the BSN. Each credential of each user can be stored in the Identity Hub (hereinafter referred to as Hub) with full access control by the user, and the content of the credential is encrypted so that only the user can parse the plaintext with his private key. 
-There are two ways to store credentials in the Hub: the user gets the credentials and registers on the Hub, and then calls the saveResource method to complete the storage; the issuer stores the credentials on behalf of the user, which requires the user to authorize access permissions to the issuer first, and the issuer can register on the Hub in advance to get its own ID in the Hub and present it to the user in the client. In this way, the user can create access permissions for the issuer, and the client provides markers to identify that the user needs to store the credentials in the Hub after the issuer has issued them, then the issuer can directly call the saveResource method after issuing the credentials to complete the storage action on behalf of the user.
+2) The credential is stored in the Identity Hub provided by the BSN. Each credential of each user can be stored in the Identity Hub (hereinafter referred to as Hub) with full access control by the user, and the content of the credential is encrypted so that only the user can parse the plaintext with his private key.
+   There are two ways to store credentials in the Hub: the user gets the credentials and registers on the Hub, and then calls the saveResource method to complete the storage; the issuer stores the credentials on behalf of the user, which requires the user to authorize access permissions to the issuer first, and the issuer can register on the Hub in advance to get its own ID in the Hub and present it to the user in the client. In this way, the user can create access permissions for the issuer, and the client provides markers to identify that the user needs to store the credentials in the Hub after the issuer has issued them, then the issuer can directly call the saveResource method after issuing the credentials to complete the storage action on behalf of the user.
 
 
       

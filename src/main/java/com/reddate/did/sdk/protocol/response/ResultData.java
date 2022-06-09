@@ -60,7 +60,7 @@ public class ResultData<T> implements Serializable {
 	public static <T> ResultData<T> success(T data) {
 		ResultData<T> result = new ResultData<>();
 		result.setCode(0);
-		result.setMsg("success");
+		result.setMsg("Success");
 		result.setData(data);
 		return result;
 	}

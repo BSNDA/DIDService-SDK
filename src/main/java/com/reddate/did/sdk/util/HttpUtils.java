@@ -36,10 +36,10 @@ public class HttpUtils<T> {
 			Class<T> returnType) {
 		RequestBody requestBody = RequestBody.create(JSONObject.toJSONString(requestParam), JSON);
 		Request request = new Request.Builder().url(url).post(requestBody).addHeader("token", token)
-				.addHeader("projectId", requestParam.getProjectId()).build();
+				.addHeader("projectId", requestParam.getProjectId()).header("Connection", "close").build();
 
 		OkHttpClient client = new OkHttpClient.Builder().connectTimeout(20, TimeUnit.SECONDS)
-				.readTimeout(60 * 10, TimeUnit.SECONDS).build();
+				.readTimeout(60, TimeUnit.SECONDS).build();
 
 		String resposneDataStr = null;
 		Response response = null;
